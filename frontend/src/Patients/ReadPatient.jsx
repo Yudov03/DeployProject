@@ -93,7 +93,7 @@ function ReadPatient() { // Ensure props are received here
                     </div>
                 </div>
             </div>
-            <Appointment name={data.name} />
+            <Appointment read="readPatient" name={data.name} />
         </>
     );
 }
