@@ -49,12 +49,14 @@ export default function AddStaff() {
                 setTimeStart('');
                 setTimeEnd('');
                 setWorkWeek(2);
+            } else if (res.status === 400) {
+                toast.error('Please fill full');
             } else {
                 toast.error('An error occurred');
             }
         } catch (error) {
             console.log(error);
-            toast.error(`${error}`);
+            toast.error(`${error}, Please try again!`);
         }
     };
 
@@ -90,10 +92,10 @@ export default function AddStaff() {
     const [workWeek, setWorkWeek] = useState(5);
     const addEventsForSelectedDays = (event) => {
         event.preventDefault();
-        if (!selectedDays.some(day => day.checked)) {
-            alert('Please select');
-            return;
-        }
+        // if (!selectedDays.some(day => day.checked) && type === 'Doctor') {
+        //     alert('Please select at least one day');
+        //     return;
+        // }
         const today = moment();
         const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -133,8 +135,8 @@ export default function AddStaff() {
         setShowTimeInputs(false); // Ẩn trường thời gian sau khi đã submit
     };
 
-    console.log(values)
-    console.log(valueDoctor)
+    // console.log(values)
+    // console.log(valueDoctor)
     // console.log(type)
 
     return (
@@ -175,16 +177,16 @@ export default function AddStaff() {
                                         <svg width="150" height="150" className="p-1 border border-1 border-primary" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" id="doctor"><path fill="#6563ff" d="M17.998 8.064 6.003 8.11l-.277-3.325A3 3 0 0 1 8.17 1.482l.789-.143a17.031 17.031 0 0 1 6.086 0l.786.143a3 3 0 0 1 2.443 3.302Z"></path><path fill="#d8d8ff" d="M6.009 8.109a5.994 5.994 0 0 0 11.984-.045Z"></path><path fill="#6563ff" d="m17.198 13.385-4.49 4.49a1 1 0 0 1-1.415 0l-4.491-4.49a9.945 9.945 0 0 0-4.736 7.44 1 1 0 0 0 .994 1.108h17.88a1 1 0 0 0 .994-1.108 9.945 9.945 0 0 0-4.736-7.44Z"></path><path fill="#b2b1ff" d="M15.69 12.654a6.012 6.012 0 0 1-7.381 0 10.004 10.004 0 0 0-1.507.73l4.491 4.492a1 1 0 0 0 1.414 0l4.491-4.491a10.005 10.005 0 0 0-1.507-.731Z"></path></svg>
                                     </div>
                                     <div className="col-8">
-                                        <label style={{ fontWeight: 'bold' }} htmlFor="name">Name:</label>
-                                        <input type="text" className="form-control" placeholder="Enter name of doctor" value={values.name} onChange={e => setValues({ ...values, name: e.target.value })} />
+                                        <label style={{ fontWeight: 'bold' }} htmlFor="nameid">Name:</label>
+                                        <input type="text" className="form-control" id="nameid" placeholder={type === 'Doctor' ? 'Enter Doctor Name' : type === 'Nurse' ? 'Enter Nurse Name' : 'Enter Staff Name'} value={values.name} onChange={e => setValues({ ...values, name: e.target.value })} />
                                         <div className="row mt-3">
                                             <div className="col-6">
-                                                <label style={{ fontWeight: 'bold' }} htmlFor="dob">Date of birth:</label>
-                                                <input type="date" className="form-control" placeholder="Enter Date of birth" value={values.dayofbirth} onChange={e => setValues({ ...values, dayofbirth: e.target.value })} />
+                                                <label style={{ fontWeight: 'bold' }} htmlFor="dobid">Date of birth:</label>
+                                                <input type="date" className="form-control" id="dobid" placeholder="Enter Date of birth" value={values.dayofbirth} onChange={e => setValues({ ...values, dayofbirth: e.target.value })} />
                                             </div>
                                             <div className="col-6">
-                                                <label style={{ fontWeight: 'bold' }} htmlFor="gender">Gender:</label>
-                                                <select className="form-control" value={values.gender} onChange={(event) => setValues({ ...values, gender: event.target.value })}>
+                                                <label style={{ fontWeight: 'bold' }} htmlFor="genderid">Gender:</label>
+                                                <select className="form-control" id="genderid" value={values.gender} onChange={(event) => setValues({ ...values, gender: event.target.value })}>
                                                     <option value="" disabled>Choose gender</option>
                                                     <option value="M">Male</option>
                                                     <option value="F">Female</option>
@@ -196,24 +198,24 @@ export default function AddStaff() {
                                 </div>
                                 <div className="row mt-3">
                                     <div className="col-6">
-                                        <label style={{ fontWeight: 'bold' }} htmlFor="phone">Phone:</label>
-                                        <input type="text" className="form-control" placeholder="Enter phone number" value={values.phone} onChange={e => setValues({ ...values, phone: e.target.value })} />
+                                        <label style={{ fontWeight: 'bold' }} htmlFor="phoneid">Phone:</label>
+                                        <input type="text" className="form-control" id="phoneid" placeholder="Enter phone number" value={values.phone} onChange={e => setValues({ ...values, phone: e.target.value })} />
                                     </div>
                                     <div className="col-6">
-                                        <label style={{ fontWeight: 'bold' }} htmlFor="email">Mail:</label>
-                                        <input type="email" className="form-control" placeholder="Enter mail" value={values.mail} onChange={e => setValues({ ...values, mail: e.target.value })} />
+                                        <label style={{ fontWeight: 'bold' }} htmlFor="emailid">Mail:</label>
+                                        <input type="email" className="form-control" id="emailid" placeholder="Enter mail" value={values.mail} onChange={e => setValues({ ...values, mail: e.target.value })} />
                                     </div>
                                     <div className="mt-3">
-                                        <label style={{ fontWeight: 'bold' }} htmlFor="basic-url" className="form-label">Address: </label>
-                                        <textarea className="form-control" aria-label="With textarea" placeholder="Enter address" value={values.address} onChange={e => setValues({ ...values, address: e.target.value })}></textarea>
+                                        <label style={{ fontWeight: 'bold' }} htmlFor="basicurl" className="form-label">Address: </label>
+                                        <textarea className="form-control" id="basicurl" aria-label="With textarea" placeholder="Enter address" value={values.address} onChange={e => setValues({ ...values, address: e.target.value })}></textarea>
                                     </div>
                                     <div className="col-6 mt-3">
-                                        <label style={{ fontWeight: 'bold' }} htmlFor="specialty">Specialty:</label>
-                                        <input type="text" className="form-control" placeholder="Enter specialty" value={values.specialty} onChange={e => setValues({ ...values, specialty: e.target.value })} />
+                                        <label style={{ fontWeight: 'bold' }} htmlFor="specialtyid">Specialty:</label>
+                                        <input type="text" className="form-control" id="specialtyid" placeholder="Enter specialty" value={values.specialty} onChange={e => setValues({ ...values, specialty: e.target.value })} />
                                     </div>
                                     <div className="col-6 mt-3">
-                                        <label style={{ fontWeight: 'bold'}} htmlFor="specialtylevel">Specialty level:</label>
-                                        <select className="form-control" value={values.specialtylevel} onChange={(event) => setValues({ ...values, specialtylevel: event.target.value })}>
+                                        <label style={{ fontWeight: 'bold' }} htmlFor="specialtylevelid">Specialty level:</label>
+                                        <select className="form-control" id="specialtylevelid" value={values.specialtylevel} onChange={(event) => setValues({ ...values, specialtylevel: event.target.value })}>
                                             <option value="" disabled>Choose specialty level</option>
                                             <option value="0">0</option>
                                             <option value="1">1</option>
@@ -222,17 +224,18 @@ export default function AddStaff() {
                                     </div>
 
                                     <div className="col-6 mt-3">
-                                        <label style={{ fontWeight: 'bold'}} htmlFor="academic_degree">Academic degree:</label>
-                                        <select className="form-control" value={values.certificate} onChange={(event) => setValues({ ...values, certificate: event.target.value })}>
+                                        <label style={{ fontWeight: 'bold' }} htmlFor="academic_degreeid">Academic degree:</label>
+                                        <select className="form-control" id="academic_degreeid" value={values.certificate} onChange={(event) => setValues({ ...values, certificate: event.target.value })}>
                                             <option value="" disabled>Choose academic degree</option>
                                             <option value="D">Doctor</option>
                                             <option value="M">Master</option>
                                             <option value="P">Ph.D</option>
+                                            <option value="N">No</option>
                                         </select>
                                     </div>
                                     <div className="col-6 mt-3">
-                                        <label style={{ fontWeight: 'bold'}} htmlFor="academicrank">Academic rank:</label>
-                                        <select className="form-control" value={values.academicrank} onChange={(event) => setValues({ ...values, academicrank: event.target.value })}>
+                                        <label style={{ fontWeight: 'bold' }} htmlFor="academicrankid">Academic rank:</label>
+                                        <select className="form-control" id="academicrankid" value={values.academicrank} onChange={(event) => setValues({ ...values, academicrank: event.target.value })}>
                                             <option value="" disabled>Choose academic rank</option>
                                             <option value="A">Associate Professor</option>
                                             <option value="P">Profressor</option>
@@ -241,8 +244,8 @@ export default function AddStaff() {
                                     </div>
                                     {type === null &&
                                         <div className="">
-                                            <label htmlFor="Positon">Position:</label>
-                                            <select className="form-control" value={values.position} onChange={(event) => setValues({ ...values, position: event.target.value })}>
+                                            <label htmlFor="Positonid">Position:</label>
+                                            <select className="form-control" id="Positonid" value={values.position} onChange={(event) => setValues({ ...values, position: event.target.value })}>
                                                 <option value="" disabled>Choose position</option>
                                                 <option value="D">Doctor</option>
                                                 <option value="N">Nurse</option>

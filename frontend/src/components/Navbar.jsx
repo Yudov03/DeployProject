@@ -102,6 +102,7 @@ import { NavLink, useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { Link, useLocation } from 'react-router-dom'
 import AxiosInstance from './AxiosInstance';
+import { toast } from 'react-toastify';
 
 export default function Navbar(props) {
     const locate = useLocation().pathname;
@@ -162,6 +163,10 @@ export default function Navbar(props) {
         AxiosInstance.post(`logoutall/`, {}).then(() => {
             localStorage.removeItem("Token");
             navigate('/');
+            toast.success('Logged out successfully!')
+        }).catch((error) => {
+            toast.error('An error occurred while logging out!')
+            console.error('Error logging out:', error);
         });
     };
 
@@ -181,7 +186,7 @@ export default function Navbar(props) {
                 </button> */}
                 <div className='col'>
 
-                <div
+                    <div
                         className="row"
                         style={{
                             borderColor: 'rgba(0, 126, 255, 0.18)',
@@ -192,8 +197,8 @@ export default function Navbar(props) {
                         onMouseLeave={() => handleMouseEnterIcon(null)}
                     >
                         <span className="d-inline-flex align-items-center mt-2 mb-1">
-                            <svg style={{width: 30, height: 30, paddingTop:3, paddingLeft:2}}><path fill="#C4E6FF" fillRule="evenodd" d="M18 18C18 18.5523 17.5523 19 17 19H16V21H8V19H1V20C1 21.6569 2.34315 23 4 23H20C21.6569 23 23 21.6569 23 20V9.60005C23 8.62111 22.5224 7.70373 21.7204 7.14235L18 4.54004V18Z" clipRule="evenodd"></path><path fill="#024493" fillRule="evenodd" d="M12 1C11.3985 1 10.796 1.18081 10.2796 1.5423L2.27961 7.1423C1.47764 7.70369 1 8.62106 1 9.6V20C1 21.6568 2.34315 23 4 23H20C21.6569 23 23 21.6568 23 20V9.6C23 8.62106 22.5224 7.70369 21.7204 7.1423L13.7204 1.5423C13.204 1.18081 12.6015 1 12 1ZM21 9.6C21 9.27369 20.8408 8.9679 20.5735 8.78077L12.5735 3.18077C12.4012 3.06021 12.2011 3 12 3C11.7989 3 11.5988 3.06021 11.4265 3.18077L3.42654 8.78077C3.15921 8.9679 3 9.27369 3 9.6V20C3 20.5523 3.44772 21 4 21H20C20.5523 21 21 20.5523 21 20V9.6Z" clipRule="evenodd"></path><path fill="#1E93FF" fillRule="evenodd" d="M12.5 7C12.7761 7 13 7.22386 13 7.5V9H14.5C14.7761 9 15 9.22386 15 9.5V10.5C15 10.7761 14.7761 11 14.5 11H13V12.5C13 12.7761 12.7761 13 12.5 13H11.5C11.2239 13 11 12.7761 11 12.5V11H9.5C9.22386 11 9 10.7761 9 10.5V9.5C9 9.22386 9.22386 9 9.5 9H11V7.5C11 7.22386 11.2239 7 11.5 7H12.5ZM11 15C9.34315 15 8 16.3431 8 18V22C8 22.5523 8.44772 23 9 23H15C15.5523 23 16 22.5523 16 22V18C16 16.3431 14.6569 15 13 15H11ZM10 18C10 17.4477 10.4477 17 11 17H13C13.5523 17 14 17.4477 14 18V21H10V18Z" clipRule="evenodd"></path></svg>
-                            {isMouseEnterNavIcon && <div style={{fontSize: 20}} className="ms-2">BK CLINIC</div>}
+                            <svg style={{ width: 30, height: 30, paddingTop: 3, paddingLeft: 2 }}><path fill="#C4E6FF" fillRule="evenodd" d="M18 18C18 18.5523 17.5523 19 17 19H16V21H8V19H1V20C1 21.6569 2.34315 23 4 23H20C21.6569 23 23 21.6569 23 20V9.60005C23 8.62111 22.5224 7.70373 21.7204 7.14235L18 4.54004V18Z" clipRule="evenodd"></path><path fill="#024493" fillRule="evenodd" d="M12 1C11.3985 1 10.796 1.18081 10.2796 1.5423L2.27961 7.1423C1.47764 7.70369 1 8.62106 1 9.6V20C1 21.6568 2.34315 23 4 23H20C21.6569 23 23 21.6568 23 20V9.6C23 8.62106 22.5224 7.70369 21.7204 7.1423L13.7204 1.5423C13.204 1.18081 12.6015 1 12 1ZM21 9.6C21 9.27369 20.8408 8.9679 20.5735 8.78077L12.5735 3.18077C12.4012 3.06021 12.2011 3 12 3C11.7989 3 11.5988 3.06021 11.4265 3.18077L3.42654 8.78077C3.15921 8.9679 3 9.27369 3 9.6V20C3 20.5523 3.44772 21 4 21H20C20.5523 21 21 20.5523 21 20V9.6Z" clipRule="evenodd"></path><path fill="#1E93FF" fillRule="evenodd" d="M12.5 7C12.7761 7 13 7.22386 13 7.5V9H14.5C14.7761 9 15 9.22386 15 9.5V10.5C15 10.7761 14.7761 11 14.5 11H13V12.5C13 12.7761 12.7761 13 12.5 13H11.5C11.2239 13 11 12.7761 11 12.5V11H9.5C9.22386 11 9 10.7761 9 10.5V9.5C9 9.22386 9.22386 9 9.5 9H11V7.5C11 7.22386 11.2239 7 11.5 7H12.5ZM11 15C9.34315 15 8 16.3431 8 18V22C8 22.5523 8.44772 23 9 23H15C15.5523 23 16 22.5523 16 22V18C16 16.3431 14.6569 15 13 15H11ZM10 18C10 17.4477 10.4477 17 11 17H13C13.5523 17 14 17.4477 14 18V21H10V18Z" clipRule="evenodd"></path></svg>
+                            {isMouseEnterNavIcon && <div style={{ fontSize: 20 }} className="ms-2">BK CLINIC</div>}
                         </span>
                     </div>
                     <hr />
@@ -320,7 +325,7 @@ export default function Navbar(props) {
                         }}
                     >
                         <span className="d-inline-flex align-items-center mt-1 mb-1">
-                        <svg viewBox="0 0 23 23"><path d="M19.5,8C18.1,8,17,9.1,17,10.5c0,1.2,0.9,2.2,2,2.4v2.6c0,3-2.5,5.5-5.5,5.5c-3,0-5.5-2.5-5.5-5.5v-1.8l3.3-2.6c1.1-0.9,1.7-2.1,1.7-3.5V2.5c0,0,0,0,0,0C13,2.2,12.8,2,12.5,2h-2C10.2,2,10,2.2,10,2.5S10.2,3,10.5,3H12v4.6c0,1.1-0.5,2.1-1.3,2.7l-3.2,2.5l-3.2-2.5C3.5,9.6,3,8.6,3,7.6V3h1.5C4.8,3,5,2.8,5,2.5S4.8,2,4.5,2h-2c0,0,0,0,0,0C2.2,2,2,2.2,2,2.5v5.1c0,1.4,0.6,2.7,1.7,3.5L7,13.7v1.8c0,3.6,2.9,6.5,6.5,6.5c3.6,0,6.5-2.9,6.5-6.5v-2.6c1.1-0.2,2-1.2,2-2.4C22,9.1,20.9,8,19.5,8z M19.5,12c-0.8,0-1.5-0.7-1.5-1.5S18.7,9,19.5,9c0.8,0,1.5,0.7,1.5,1.5C21,11.3,20.3,12,19.5,12z"></path></svg>
+                            <svg viewBox="0 0 23 23"><path d="M19.5,8C18.1,8,17,9.1,17,10.5c0,1.2,0.9,2.2,2,2.4v2.6c0,3-2.5,5.5-5.5,5.5c-3,0-5.5-2.5-5.5-5.5v-1.8l3.3-2.6c1.1-0.9,1.7-2.1,1.7-3.5V2.5c0,0,0,0,0,0C13,2.2,12.8,2,12.5,2h-2C10.2,2,10,2.2,10,2.5S10.2,3,10.5,3H12v4.6c0,1.1-0.5,2.1-1.3,2.7l-3.2,2.5l-3.2-2.5C3.5,9.6,3,8.6,3,7.6V3h1.5C4.8,3,5,2.8,5,2.5S4.8,2,4.5,2h-2c0,0,0,0,0,0C2.2,2,2,2.2,2,2.5v5.1c0,1.4,0.6,2.7,1.7,3.5L7,13.7v1.8c0,3.6,2.9,6.5,6.5,6.5c3.6,0,6.5-2.9,6.5-6.5v-2.6c1.1-0.2,2-1.2,2-2.4C22,9.1,20.9,8,19.5,8z M19.5,12c-0.8,0-1.5-0.7-1.5-1.5S18.7,9,19.5,9c0.8,0,1.5,0.7,1.5,1.5C21,11.3,20.3,12,19.5,12z"></path></svg>
                             {isMouseEnterNavIcon && <div className="ms-3">Equipments</div>}
                         </span>
                     </div>

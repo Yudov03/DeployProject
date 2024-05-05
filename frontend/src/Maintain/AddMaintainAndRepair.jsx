@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import AxiosInstance from "../components/AxiosInstance";
 import moment from "moment";
+import { toast } from "react-toastify";
 export default function () {
     const location = useLocation();
     const { name } = location.state || { name: null };
@@ -12,13 +13,33 @@ export default function () {
         date: moment().format('YYYY-MM-DD'),
         type: '',
     })
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
-        AxiosInstance.post(`maintainandrepair/`, values)
-            .then(res => {
-                console.log(res);
-            })
-            .catch(err => console.log(err));
+        try {
+            const res = await AxiosInstance.post(`maintainandrepair/`, values)
+            console.log(res);
+            if (res.status === 201) {
+                toast.success('Added Success');
+                setValues({
+                    name: name ? name : '',
+                    detail: '',
+                    date: moment().format('YYYY-MM-DD'),
+                    type: '',
+                });
+            } else if (res.status === 400) {
+                toast.error('Please fill full');
+            } else {
+                toast.error('An error occurred');
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error(`${error}, Please try again!`);
+        }
+        // AxiosInstance.post(`maintainandrepair/`, values)
+        //     .then(res => {
+        //         console.log(res);
+        //     })
+        //     .catch(err => console.log(err));
         // setValues({
         //     name: '',
         //     detail: '',
@@ -35,7 +56,7 @@ export default function () {
             <div className="d-flex align-items-center justify-content-center mt-3">
                 <div className="w-75 mx-auto d-flex justify-content-between align-items-center" style={{ height: '10vh' }}>
                     <div className="flex-grow-1">
-                        <h3>MAINTAIN AND REPAIR INVENTORY</h3>
+                        <h3>MAINTAIN AND REPAIR HISTORY</h3>
                     </div>
                     <div className="p-2">
                         <svg width="50" height="50" className="p-1 rounded-circle border border-1 border-primary" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" id="user"><path fill="#42c3cf" d="M31.64,27.72a13.94,13.94,0,0,1-15.28,0A18,18,0,0,0,6.05,42.94a1,1,0,0,0,.27.75,1,1,0,0,0,.73.31H41a1,1,0,0,0,.73-.31,1,1,0,0,0,.27-.75A18,18,0,0,0,31.64,27.72Z"></path><circle cx="24" cy="16" r="12" fill="#42c3cf"></circle></svg>
@@ -46,7 +67,7 @@ export default function () {
                     </div>
                 </div>
             </div>
-            <div className="d-flex flex-column align-items-center justify-content-center mb-5" style={{ paddingTop: 20 }}>
+            <div className="d-flex flex-column align-items-center justify-content-center mb-4" style={{ paddingTop: 20 }}>
                 <div className="w-75 rounded bg-white border shadow " style={{ minHeight: 400 }}>
                     <div className="d-flex justify-content-between p-2 align-items-center border-bottom">
                         <div className="mx-3">
@@ -64,31 +85,32 @@ export default function () {
                             <form onSubmit={handleSubmit}>
                                 <div className="row">
                                     <div className="col-4">
-                                        <svg width="150" height="150" className="p-1 border border-1 border-primary" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" id="medicine"><g><path fill="#78b9eb" d="M8 10h14v6H8zM27 30v18H3V30zm-7 11v-4h-3v-3h-4v3h-3v4h3v3h4v-3zm39 2v4h-6v-4a3 3 0 0 1 6 0zm-15 5a3 3 0 0 1 0 6h-4v-6z"></path><circle cx="41" cy="36" r="6" fill="#78b9eb"></circle><circle cx="55" cy="22" r="5.996" fill="#78b9eb"></circle><path fill="#006df0" d="M44 47h-8a4 4 0 0 0 0 8h8a4 4 0 0 0 0-8zm-5 6h-3a2 2 0 0 1 0-4h3zm5 0h-3v-4h3a2 2 0 0 1 0 4zm12-14a4 4 0 0 0-4 4v8a4 4 0 0 0 8 0v-8a4 4 0 0 0-4-4zm2 12a2 2 0 0 1-4 0v-3h4zm0-5h-4v-3a2 2 0 0 1 4 0zM41 29a7 7 0 1 0 7 7 7.008 7.008 0 0 0-7-7zm0 12a5 5 0 1 1 5-5 5.006 5.006 0 0 1-5 5z"></path><path fill="#006df0" d="M37 35h8v2h-8zM59.949 26.95A7 7 0 1 0 55 29a6.957 6.957 0 0 0 4.949-2.05zM50 22a4.966 4.966 0 0 1 .829-2.757l1.343 1.343 1.414-1.414-1.343-1.343a5 5 0 0 1 6.928 6.928L55 20.586 53.586 22l4.171 4.171A5 5 0 0 1 50 22zm-25.63 1.21-1.19-.34A3.009 3.009 0 0 1 21 19.98V17h1a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h1v2.98a3.009 3.009 0 0 1-2.18 2.89l-1.19.34A5.022 5.022 0 0 0 2 28.02V52a3.009 3.009 0 0 0 3 3h20a3.009 3.009 0 0 0 3-3V28.02a5.022 5.022 0 0 0-3.63-4.81zM9 11h12v4H9zm17 41a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3h22zm0-5H4V31h22zm0-18H4v-.98a3.009 3.009 0 0 1 2.18-2.89l1.19-.34A5.022 5.022 0 0 0 11 19.98V17h8v2.98a5.022 5.022 0 0 0 3.63 4.81l1.19.34A3.009 3.009 0 0 1 26 28.02z"></path><path fill="#006df0" d="M10 42h2v2a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-2h2a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1h-2v-2a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v2h-2a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1Zm1-4h2a1 1 0 0 0 1-1v-2h2v2a1 1 0 0 0 1 1h2v2h-2a1 1 0 0 0-1 1v2h-2v-2a1 1 0 0 0-1-1h-2Z"></path></g></svg>
+                                        <svg width="150" height="150" className="p-1 border border-1 border-primary" fillRule="evenodd" clipRule="evenodd" imageRendering="optimizeQuality" shapeRendering="geometricPrecision" textRendering="geometricPrecision" viewBox="0 0 1707 1707" id="gear"><defs><linearGradient id="a" x1="-38.181" x2="1744.84" y1="110.402" y2="1596.26" gradientUnits="userSpaceOnUse"><stop offset="0" stopColor="#08b6ff"></stop><stop offset=".012" stopColor="#2790ff"></stop><stop offset=".259" stopColor="#47c7ff"></stop><stop offset=".478" stopColor="#4cc9ff"></stop><stop offset=".8" stopColor="#4a9eff"></stop><stop offset=".929" stopColor="#466aff"></stop><stop offset="1" stopColor="#466aff"></stop></linearGradient></defs><path fill="url(#a)" d="M592 1642c-8,0 -15,-1 -23,-4l-190 -66c-37,-12 -56,-52 -44,-89l31 -89c-26,-20 -51,-42 -73,-66l-86 42c-34,17 -77,2 -93,-32l-89 -182c-8,-16 -9,-35 -3,-53 6,-18 19,-32 36,-40l85 -42c-5,-32 -7,-65 -6,-98l-90 -31c-17,-6 -32,-19 -40,-35 -8,-17 -9,-36 -3,-54l66 -191c6,-17 18,-32 35,-40 17,-8 36,-9 54,-3l90 31c19,-26 41,-51 65,-74l-42 -85c-17,-35 -2,-77 32,-94l182 -88c17,-8 36,-9 53,-3 18,6 32,19 40,35l42 86c32,-5 65,-7 98,-6l31 -90c13,-36 53,-56 89,-43l139 50c-14,38 -22,79 -24,121 -4,103 34,205 104,281 36,39 59,87 68,139 -20,1 -37,13 -45,30 -36,-175 -192,-306 -377,-306 -212,0 -385,173 -385,385 0,212 173,385 385,385 198,0 361,-150 383,-342 8,11 21,19 35,20l0 23c0,27 23,50 50,50l9 0c19,42 62,72 111,72l88 0 -41 118c-6,17 -19,31 -36,40 -17,8 -36,9 -53,3l-90 -31c-20,26 -42,51 -65,74l41 85c17,35 3,77 -32,94l-181 88c-17,8 -36,9 -54,3 -18,-6 -32,-19 -40,-35l-42 -86c-32,5 -65,7 -98,6l-31 90c-6,18 -18,32 -35,40 -10,5 -20,7 -31,7zm795 -529l-95 0c-43,0 -79,-31 -87,-73l-33 0c-9,0 -16,-7 -16,-16l0 -23 368 0 0 23c0,9 -8,16 -17,16l-33 0c-7,42 -44,73 -87,73zm165 -145l-425 0c-9,0 -17,-7 -17,-17l0 -72c0,-9 8,-17 17,-17l425 0c10,0 17,8 17,17l0 72c0,10 -7,17 -17,17zm-393 -139c-9,-61 -35,-117 -77,-162 -64,-70 -98,-161 -94,-257 3,-93 42,-179 109,-244 67,-65 155,-101 247,-101l3 0c198,0 360,161 360,359 0,89 -33,175 -93,241 -43,47 -70,104 -79,164l-376 0zm-66 -386c-8,0 -16,-6 -17,-14 -2,-15 -3,-30 -3,-44 3,-56 26,-109 67,-148 40,-39 93,-61 149,-61 0,0 1,0 1,0 9,0 16,7 16,16 0,9 -7,17 -16,17 -99,1 -179,78 -183,177 -1,13 0,25 2,37 2,9 -5,18 -14,19 -1,1 -2,1 -2,1z"></path></svg>
                                     </div>
-                                    <div className="col-8">
-                                        <div className="col">
-                                            <label style={{ fontWeight: 'bold' }} htmlFor="name">Name:</label>
-                                            <input type="text" className="form-control" placeholder={`${values.name}`} value={values.name} onChange={e => setValues({ ...values, name: e.target.value })} />
+                                    <div className="col-8 mt-2">
+                                        <div className="d-flex justify-content-center">
+                                            <h5 style={{ fontWeight: 'bold', textTransform: 'uppercase' }}>{values.name}</h5>
                                         </div>
-                                        <div className="col mt-3">
-                                            <label style={{ fontWeight: 'bold' }} htmlFor="date">Added Day:</label>
-                                            <input type="date" className="form-control" placeholder={`${values.date}`} value={values.date} onChange={e => setValues({ ...values, date: e.target.value })} />
+                                        <div className="row mt-3">
+                                        <div className="col-6">
+                                            <label style={{ fontWeight: 'bold' }} htmlFor="dateid">Date:</label>
+                                            <input type="date" className="form-control" id="dateid" placeholder={`${values.date}`} value={values.date} onChange={e => setValues({ ...values, date: e.target.value })} />
                                         </div>
-                                        <div className="col">
-                                            <label style={{ fontWeight: 'bold' }} htmlFor="name">Type:</label>
-                                            <select className="form-control" name="type" value={values.type} onChange={(event) => setValues({ ...values, type: event.target.value })}>
-                                                <option disabled>Choose</option>
+                                        <div className="col-6">
+                                            <label style={{ fontWeight: 'bold' }} htmlFor="typeid">Type:</label>
+                                            <select className="form-control" id="typeid" value={values.type} onChange={(event) => setValues({ ...values, type: event.target.value })}>
+                                                <option value="" disabled>Choose</option>
                                                 <option value="M">Maintain</option>
                                                 <option value="R">Repair</option>
                                             </select>
+                                        </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="mt-3">
-                                    <label style={{ fontWeight: 'bold' }} htmlFor="basic-url" className="form-label">Description: </label>
-                                    <textarea style={{ height: 150 }} className="form-control" aria-label="With textarea" placeholder={`${values.detail}`} value={values.detail} onChange={e => setValues({ ...values, detail: e.target.value })}></textarea>
+                                    <label style={{ fontWeight: 'bold' }} htmlFor="basicurlid" className="form-label">Description: </label>
+                                    <textarea style={{ height: 100 }} className="form-control" id="basicurlid" aria-label="With textarea" placeholder={`${values.detail}`} value={values.detail} onChange={e => setValues({ ...values, detail: e.target.value })}></textarea>
                                 </div>
 
                                 <div className="d-grid gap-2 col-3 mx-auto mt-4 mb-4">

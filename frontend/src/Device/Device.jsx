@@ -4,6 +4,7 @@ import AxiosInstance from "../components/AxiosInstance";
 import { Link, useNavigate } from "react-router-dom";
 import Sort from "../Sort/Sort";
 import { NavLink } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function Device() {
 
@@ -14,18 +15,31 @@ export default function Device() {
             .then(res => setData(res.data))
             .catch(err => console.log(err));
     }, []);
-    console.log('data: ', data);
+    // console.log('data: ', data);
 
-    const handleDelete = (id) => {
+    const handleDelete = async (id) => {
         const confirm = window.confirm("Would you like to Delete?");
         if (confirm) {
-            AxiosInstance.delete(`device/${id}/`)
-                .then(res => {
-                    location.reload()
-                })
-                .catch(err => console.log(err));
+            try {
+                await AxiosInstance.delete(`device/${id}/`);
+                toast.success('Deleted Success!');
+                // Cập nhật dữ liệu sau khi xóa
+                setData(prevData => prevData.filter(item => item.id !== id));
+                setFilteredData(prevFilteredData => prevFilteredData.filter(item => item.id !== id));
+                setSortedData(prevFilteredData => prevFilteredData.filter(item => item.id !== id));
+                // Nếu cần cập nhật các biến state khác, hãy thêm ở đây
+                if (currentData.length === 1 && currentPage !== 1) {
+                    paginate(currentPage - 1); // Chuyển đến trang trước nếu currentData rỗng và không phải là trang đầu tiên
+                } else if (currentData.length === 1 && currentPage === 1) {
+                    paginate(1); // Nếu currentData rỗng và đang ở trang đầu tiên, vẫn paginate trang đầu tiên
+                }
+            } catch (error) {
+                console.log(error);
+                toast.error('An error occurred!');
+            }
         }
     }
+
 
     const navigate = useNavigate();
     const handleBackButton = () => {
@@ -106,7 +120,7 @@ export default function Device() {
                 </div>
             </div>
             <div className="d-flex flex-column align-items-center justify-content-center mb-4" style={{ paddingTop: 20 }}>
-                <div className="w-75 rounded bg-white border shadow " style={{ }}>
+                <div className="w-75 rounded bg-white border shadow " style={{}}>
                     <div className="d-flex justify-content-end mt-3 align-items-end border-bottom">
                         <div className="flex-grow-1 mx-3">
                             <h5>Equipment List</h5>
@@ -119,83 +133,83 @@ export default function Device() {
                     </div>
                     <div className="mx-3" style={{}}>
                         {filteredData.length > 0 ? (
+                            <table className="table table-hover table-striped align-middle">
+                                <thead>
+                                    <tr>
+                                        {/* <th>Picture</th> */}
+                                        <th>Name</th>
+                                        <th>Description</th>
+                                        <th>Status</th>
+                                        <th>Availability</th>
+                                        <th>User Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {currentData.map((d, i) => (
+                                        <tr key={i}>
+                                            {/* <td>{d.id}</td> */}
+                                            <td style={{ width: 220, textTransform: 'uppercase', fontWeight: 500 }}>{d.name}</td>
+                                            <td style={{ width: 365, textTransform: 'lowercase' }}><div className="overflow-hidden text-nowrap" style={{ width: 330 }}>{d.status}</div></td>
+                                            <td style={{ width: 125 }}>{d.description === "N" ? <div>Normal</div> : <div>{d.description === "W" ? <div>Working</div> : <div>{d.description === "D" ? "Damaged" : "Maintaining"}</div>}</div>}</td>
+                                            <td style={{ width: 145 }}>{d.available ? <div style={{ color: 'green' }}>Available</div> : <div style={{ color: 'red' }}>Unavailable</div>}</td>
+                                            <td>
+                                                <Link to={`read/${d.id}`} className='btn btn-sm btn-info me-2'><i className="bi bi-info-square"></i></Link>
+                                                <Link to={`update/${d.id}`} className="btn btn-sm btn-primary me-2"><i className="bi bi-pencil-square"></i></Link>
+                                                <button onClick={() => handleDelete(d.id)} className="btn btn-sm btn-danger"><i className="bi bi-trash3"></i></button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        ) : (
+                            searchValue && filteredData.length === 0 ? (
                                 <table className="table table-hover table-striped align-middle">
                                     <thead>
                                         <tr>
                                             {/* <th>Picture</th> */}
-                                            <th>Name</th>
-                                            <th>Description</th>
-                                            <th>Status</th>
-                                            <th>Availability</th>
+                                            <th style={{ width: 220 }}>Name</th>
+                                            <th style={{ width: 365 }}>Description</th>
+                                            <th style={{ width: 125 }}>Status</th>
+                                            <th style={{ width: 145 }}>Availability</th>
                                             <th>User Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colSpan="10">No results found</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            ) : (
+                                <table className="table table-hover table-striped align-middle">
+                                    <thead>
+                                        <tr>
+                                            {/* <th>Picture</th> */}
+                                            <th>Name <Sort handleSortChange={handleSortChange} type="name" sortDirection={sortDirections.name} /></th>
+                                            <th>Description <Sort handleSortChange={handleSortChange} type="status" sortDirection={sortDirections.status} /></th>
+                                            <th>Status <Sort handleSortChange={handleSortChange} type="description" sortDirection={sortDirections.description} /></th>
+                                            <th>Availability <Sort handleSortChange={handleSortChange} type="available" sortDirection={sortDirections.available} /></th>
+                                            <th style={{ paddingBottom: 14 }}>User Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {currentData.map((d, i) => (
                                             <tr key={i}>
                                                 {/* <td>{d.id}</td> */}
-                                                <td style={{ width: 220, textTransform: 'uppercase', fontWeight: 500}}>{d.name}</td>
-                                                <td style={{ width: 365, textTransform: 'lowercase'}}><div className="overflow-hidden text-nowrap" style={{width: 330}}>{d.status}</div></td>
-                                                <td style={{ width: 125 }}>{d.description  === "N"?<div>Normal</div>: <div>{d.description === "W"? <div>Working</div>:<div>{d.description === "D"?"Damaged":"Maintaining"}</div>}</div>}</td>
+                                                <td style={{ width: 220, textTransform: 'uppercase', fontWeight: 500 }}>{d.name}</td>
+                                                <td style={{ width: 365, textTransform: 'lowercase' }}> <div className="overflow-hidden text-nowrap" style={{ width: 330 }}>{d.status}</div> </td>
+                                                <td style={{ width: 125 }}>{d.description === "N" ? <div>Normal</div> : <div>{d.description === "W" ? <div>Working</div> : <div>{d.description === "D" ? "Damaged" : "Maintaining"}</div>}</div>}</td>
                                                 <td style={{ width: 145 }}>{d.available ? <div style={{ color: 'green' }}>Available</div> : <div style={{ color: 'red' }}>Unavailable</div>}</td>
                                                 <td>
-                                                    <Link to={`read/${d.id}`} className='btn btn-sm btn-info me-2'><i class="bi bi-info-square"></i></Link>
-                                                    <Link to={`update/${d.id}`} className="btn btn-sm btn-primary me-2"><i class="bi bi-pencil-square"></i></Link>
-                                                    <button onClick={() => handleDelete(d.id)} className="btn btn-sm btn-danger"><i class="bi bi-trash3"></i></button>
+                                                    <Link to={`read/${d.id}`} className='btn btn-sm btn-info me-2'><i className="bi bi-info-square"></i></Link>
+                                                    <Link to={`update/${d.id}`} className="btn btn-sm btn-primary me-2"><i className="bi bi-pencil-square"></i></Link>
+                                                    <button onClick={() => handleDelete(d.id)} className="btn btn-sm btn-danger"><i className="bi bi-trash3"></i></button>
                                                 </td>
                                             </tr>
                                         ))}
                                     </tbody>
                                 </table>
-                            ) : (
-                                searchValue && filteredData.length === 0 ? (
-                                    <table className="table table-hover table-striped align-middle">
-                                        <thead>
-                                            <tr>
-                                                {/* <th>Picture</th> */}
-                                                <th style={{ width: 220 }}>Name</th>
-                                                <th style={{ width: 365 }}>Description</th>
-                                                <th style={{ width: 125 }}>Status</th>
-                                                <th style={{ width: 145 }}>Availability</th>
-                                                <th>User Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td  colSpan="10">No results found</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                ) : (
-                                    <table className="table table-hover table-striped align-middle">
-                                        <thead>
-                                            <tr>
-                                                {/* <th>Picture</th> */}
-                                                <th>Name <Sort handleSortChange={handleSortChange} type="name" sortDirection={sortDirections.name} /></th>
-                                                <th>Description <Sort handleSortChange={handleSortChange} type="status" sortDirection={sortDirections.status} /></th>
-                                                <th>Status <Sort handleSortChange={handleSortChange} type="description" sortDirection={sortDirections.description} /></th>
-                                                <th>Availability <Sort handleSortChange={handleSortChange} type="available" sortDirection={sortDirections.available} /></th>
-                                                <th style={{ paddingBottom: 14 }}>User Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {currentData.map((d, i) => (
-                                                <tr key={i}>
-                                                    {/* <td>{d.id}</td> */}
-                                                    <td style={{ width: 220, textTransform: 'uppercase', fontWeight: 500}}>{d.name}</td>
-                                                    <td style={{ width: 365, textTransform: 'lowercase'}}> <div className="overflow-hidden text-nowrap" style={{width: 330}}>{d.status}</div> </td>
-                                                    <td style={{ width: 125 }}>{d.description  === "N"?<div>Normal</div>: <div>{d.description === "W"? <div>Working</div>:<div>{d.description === "D"?"Damaged":"Maintaining"}</div>}</div>}</td>
-                                                    <td style={{ width: 145 }}>{d.available ? <div style={{ color: 'green' }}>Available</div> : <div style={{ color: 'red' }}>Unavailable</div>}</td>
-                                                    <td>
-                                                        <Link to={`read/${d.id}`} className='btn btn-sm btn-info me-2'><i class="bi bi-info-square"></i></Link>
-                                                        <Link to={`update/${d.id}`} className="btn btn-sm btn-primary me-2"><i class="bi bi-pencil-square"></i></Link>
-                                                        <button onClick={() => handleDelete(d.id)} className="btn btn-sm btn-danger"><i class="bi bi-trash3"></i></button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                ))
+                            ))
                         }
                     </div>
                     {searchValue && filteredData.length === 0 ? "" :

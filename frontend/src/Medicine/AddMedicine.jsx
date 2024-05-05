@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AxiosInstance from "../components/AxiosInstance";
 import moment from "moment";
+import { toast } from "react-toastify";
 
 export default function AddMedicine() {
 
@@ -13,20 +14,41 @@ export default function AddMedicine() {
         description: '',
     });
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
-        AxiosInstance.post(`medicines/`, values)
-            .then(res => {
-                console.log(res);
-            })
-            .catch(err => console.log(err));
-        setValues({
-            name: '',
-            exp: '',
-            imp: '',
-            expiry: '',
-            description: '',
-        });
+        try {
+            const res = await AxiosInstance.post(`medicines/`, values)
+            console.log(res);
+            if (res.status === 201) {
+                toast.success('Added Success');
+                setValues({
+                    name: '',
+                    exp: '',
+                    imp: '',
+                    expiry: '',
+                    description: '',
+                });
+            } else if (res.status === 400) {
+                toast.error('Please fill full');
+            } else {
+                toast.error('An error occurred');
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error(`${error}, Please try again!`);
+        }
+        // AxiosInstance.post(`medicines/`, values)
+        //     .then(res => {
+        //         console.log(res);
+        //     })
+        //     .catch(err => console.log(err));
+        // setValues({
+        //     name: '',
+        //     exp: '',
+        //     imp: '',
+        //     expiry: '',
+        //     description: '',
+        // });
     };
 
     const navigate = useNavigate();
@@ -64,7 +86,7 @@ export default function AddMedicine() {
                         <div className="me-3"><i className="bi bi-plus-square" style={{ fontSize: '1.9rem' }}></i></div>
                     </div>
                     <div className="d-flex justify-content-center mt-4" >
-                        <div className="mx-5" style={{width: 600}}>
+                        <div className="mx-5" style={{ width: 600 }}>
                             <form onSubmit={handleSubmit}>
                                 <div className="row">
                                     <div className="col-4">
@@ -72,28 +94,28 @@ export default function AddMedicine() {
                                     </div>
                                     <div className="col-8">
                                         <div className="col">
-                                            <label style={{ fontWeight: 'bold'}} htmlFor="name">Name:</label>
-                                            <input type="text" className="form-control" placeholder="Enter name of medicine" value={values.name} onChange={e => setValues({ ...values, name: e.target.value })} />
+                                            <label style={{ fontWeight: 'bold' }} htmlFor="nameid">Name:</label>
+                                            <input type="text" className="form-control" id="nameid" placeholder="Enter name of medicine" value={values.name} onChange={e => setValues({ ...values, name: e.target.value })} />
                                         </div>
                                         <div className="col mt-3">
-                                            <label style={{ fontWeight: 'bold'}} htmlFor="expiry">Expired Day:</label>
-                                            <input type="date" className="form-control" value={values.expiry} onChange={e => setValues({ ...values, expiry: e.target.value })} />
+                                            <label style={{ fontWeight: 'bold' }} htmlFor="expiryid">Expired Day:</label>
+                                            <input type="date" className="form-control" id="expiryid" value={values.expiry} onChange={e => setValues({ ...values, expiry: e.target.value })} />
                                         </div>
                                     </div>
                                 </div>
                                 <div className="row mt-3">
-                                <div className="col">
-                                        <label style={{ fontWeight: 'bold'}} htmlFor="imp">Import Day:</label>
-                                        <input type="date" className="form-control" value={values.imp} onChange={e => setValues({ ...values, imp: e.target.value })} />
+                                    <div className="col">
+                                        <label style={{ fontWeight: 'bold' }} htmlFor="impid">Import Day:</label>
+                                        <input type="date" className="form-control" id="impid" value={values.imp} onChange={e => setValues({ ...values, imp: e.target.value })} />
                                     </div>
                                     <div className="col">
-                                        <label style={{ fontWeight: 'bold'}} htmlFor="exp">Export Day:</label>
-                                        <input type="date" className="form-control" value={values.exp} onChange={e => setValues({ ...values, exp: e.target.value })} />
+                                        <label style={{ fontWeight: 'bold' }} htmlFor="expid">Export Day:</label>
+                                        <input type="date" className="form-control" id="expid" value={values.exp} onChange={e => setValues({ ...values, exp: e.target.value })} />
                                     </div>
                                 </div>
                                 <div className="mt-3 ">
-                                    <label style={{ fontWeight: 'bold'}} htmlFor="basic-url" className="form-label">Description: </label>
-                                    <textarea style={{height: 150}} className="form-control" aria-label="With textarea" placeholder="Enter description" value={values.description} onChange={e => setValues({ ...values, description: e.target.value })}></textarea>
+                                    <label style={{ fontWeight: 'bold' }} htmlFor="basicurll" className="form-label">Description: </label>
+                                    <textarea style={{ height: 150 }} id="basicurll" className="form-control" aria-label="With textarea" placeholder="Enter description" value={values.description} onChange={e => setValues({ ...values, description: e.target.value })}></textarea>
                                 </div>
                                 <div className="d-grid gap-2 col-3 mx-auto mt-4 mb-4">
                                     <button className=" btn btn-success">Submit</button>

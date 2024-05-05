@@ -3,29 +3,44 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Search from "../Search/Search";
 import Sort from "../Sort/Sort";
+import { toast } from "react-toastify";
 
 export default function Other() {
 
-    const [otherData, setData] = useState([])
+    const [otherData, setData] = useState([]);
     useEffect(() => {
         AxiosInstance.get(`staffs/`)
             .then(res => {
-                const filtered = res.data.filter(otherData => otherData.position === 'O')
-                setData(filtered)
+                const filtered = res.data.filter(otherData => otherData.position === 'O');
+                setData(filtered);
             })
-            .catch(err => console.log(err));
+            .catch(err => {
+                console.error('Error fetching other staff data:', err);
+                toast.error('Error fetching other staff data. Please try again later.');
+            });
     }, []);
 
     const handleDelete = (id) => {
-        const confirm = window.confirm("Would you like to Delete?");
-        if (confirm) {
+        const confirmDelete = window.confirm("Would you like to delete?");
+        if (confirmDelete) {
             AxiosInstance.delete(`staffs/${id}/`)
-                .then(res => {
-                    location.reload()
+                .then(() => {
+                    setData(prevData => prevData.filter(item => item.id !== id));
+                    setFilteredData(prevFilteredData => prevFilteredData.filter(item => item.id !== id));
+                    setSortedData(prevFilteredData => prevFilteredData.filter(item => item.id !== id));
+                    toast.success('Other staff member deleted successfully.');
+                    if (currentData.length === 1 && currentPage !== 1) {
+                        paginate(currentPage - 1); // Chuyển đến trang trước nếu currentData rỗng và không phải là trang đầu tiên
+                    } else if (currentData.length === 1 && currentPage === 1) {
+                        paginate(1); // Nếu currentData rỗng và đang ở trang đầu tiên, vẫn paginate trang đầu tiên
+                    }
                 })
-                .catch(err => console.log(err));
+                .catch(err => {
+                    console.error('Error deleting other staff member:', err);
+                    toast.error('Error deleting other staff member. Please try again later.');
+                });
         }
-    }
+    };
 
     const [sortedData, setSortedData] = useState([]);
     const [sortDirections, setSortDirections] = useState({
@@ -85,14 +100,14 @@ export default function Other() {
 
     return (
         <>
-            <div style={{ }}>
+            <div style={{}}>
                 <div className="d-flex align-items-center">
                     <div className="d-flex flex-grow-1 align-items-center mx-3">
                         <Search onSearchChange={handleSearchChange} searchData={otherData} />
                     </div>
-                    <Link to="/staff/add" state={{ type: "Doctor" }} className='btn btn-success me-5 py-1 mb-3 mt-3'> + New Other Staff </Link>
+                    <Link to="/staff/add" state={{ type: "Other" }} className='btn btn-success me-5 py-1 mb-3 mt-3'> + New Other Staff </Link>
                     <div className="mb-2 me-3 mt-2">
-                        <svg style={{width:30, height:30}} className="" ><path d="M19.542,16.027A7,7,0,0,0,23,10V5a3,3,0,0,0-3-3H12A3,3,0,0,0,9,5v5a7,7,0,0,0,3.458,6.027A9,9,0,0,0,4,25v3a2,2,0,0,0,2,2H26a2,2,0,0,0,2-2V25A9,9,0,0,0,19.542,16.027ZM12,4h8a1,1,0,0,1,1,1V8H11V5A1,1,0,0,1,12,4Zm-1,6H21a5,5,0,0,1-10,0Zm0,12a1,1,0,1,1-1,1A1,1,0,0,1,11,22ZM6,28V25a7,7,0,0,1,4-6.315v1.5a3,3,0,1,0,2,0v-2.1A7.026,7.026,0,0,1,13,18h6v1.142A4,4,0,0,0,16,23v2a1,1,0,0,0,1,1h1a1,1,0,0,0,0-2V23a2,2,0,0,1,4,0v1a1,1,0,0,0,0,2h1a1,1,0,0,0,1-1V23a4,4,0,0,0-3-3.858V18.3A7.009,7.009,0,0,1,26,25v3Z"></path></svg>                
+                        <svg style={{ width: 30, height: 30 }} className="" ><path d="M19.542,16.027A7,7,0,0,0,23,10V5a3,3,0,0,0-3-3H12A3,3,0,0,0,9,5v5a7,7,0,0,0,3.458,6.027A9,9,0,0,0,4,25v3a2,2,0,0,0,2,2H26a2,2,0,0,0,2-2V25A9,9,0,0,0,19.542,16.027ZM12,4h8a1,1,0,0,1,1,1V8H11V5A1,1,0,0,1,12,4Zm-1,6H21a5,5,0,0,1-10,0Zm0,12a1,1,0,1,1-1,1A1,1,0,0,1,11,22ZM6,28V25a7,7,0,0,1,4-6.315v1.5a3,3,0,1,0,2,0v-2.1A7.026,7.026,0,0,1,13,18h6v1.142A4,4,0,0,0,16,23v2a1,1,0,0,0,1,1h1a1,1,0,0,0,0-2V23a2,2,0,0,1,4,0v1a1,1,0,0,0,0,2h1a1,1,0,0,0,1-1V23a4,4,0,0,0-3-3.858V18.3A7.009,7.009,0,0,1,26,25v3Z"></path></svg>
                     </div>
                 </div>
 
@@ -113,7 +128,7 @@ export default function Other() {
                                 <tr key={i}>
                                     <td style={{ width: 145, textTransform: 'uppercase', fontWeight: 500 }}>{d.name}</td>
                                     <td style={{ width: 170 }}>{d.dayofbirth}</td>
-                                    <td style={{ width: 130 }}>{d.gender === 'M' ? "Male" :<div>{d.gender==='F'?"Female":"Other"}</div> }</td>
+                                    <td style={{ width: 130 }}>{d.gender === 'M' ? "Male" : <div>{d.gender === 'F' ? "Female" : "Other"}</div>}</td>
                                     <td style={{ width: 260 }}>{d.mail}</td>
                                     <td style={{ width: 150 }}>{d.phone}</td>
                                     <td>
@@ -139,7 +154,7 @@ export default function Other() {
                         </thead>
                         <tbody>
                             <tr>
-                                <td  colSpan="10">No results found</td>
+                                <td colSpan="10">No results found</td>
                             </tr>
                         </tbody>
                     </table>
@@ -158,9 +173,9 @@ export default function Other() {
                         <tbody>
                             {currentData.map((d, i) => (
                                 <tr key={i}>
-                                    <td style={{ width: 145, textTransform: 'uppercase', fontWeight: 500}}>{d.name}</td>
+                                    <td style={{ width: 145, textTransform: 'uppercase', fontWeight: 500 }}>{d.name}</td>
                                     <td style={{ width: 170 }}>{d.dayofbirth}</td>
-                                    <td style={{ width: 130 }}>{d.gender === 'M' ? "Male" :<div>{d.gender==='F'?"Female":"Other"}</div> }</td>
+                                    <td style={{ width: 130 }}>{d.gender === 'M' ? "Male" : <div>{d.gender === 'F' ? "Female" : "Other"}</div>}</td>
                                     <td style={{ width: 260 }}>{d.mail}</td>
                                     <td style={{ width: 150 }}>{d.phone}</td>
                                     <td>

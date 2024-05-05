@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Search from "../Search/Search";
 import Sort from '../Sort/Sort';
 import moment from 'moment';
+import { toast } from "react-toastify";
 export default function Medicine() {
 
     const [medicine, setData] = useState([]);
@@ -13,16 +14,29 @@ export default function Medicine() {
             .catch(err => console.log(err));
     }, []);
 
-    const handleDelete = (id) => {
+    const handleDelete = async (id) => {
         const confirm = window.confirm("Would you like to Delete?");
         if (confirm) {
-            AxiosInstance.delete(`medicines/${id}`)
-                .then(res => {
-                    location.reload()
-                })
-                .catch(err => console.log(err));
+            try {
+                await AxiosInstance.delete(`medicines/${id}`);
+                toast.success('Deleted Success!');
+                // Cập nhật dữ liệu sau khi xóa
+                setData(prevData => prevData.filter(item => item.id !== id));
+                setFilteredData(prevFilteredData => prevFilteredData.filter(item => item.id !== id));
+                setSortedData(prevFilteredData => prevFilteredData.filter(item => item.id !== id));
+                // Nếu cần cập nhật các biến state khác, hãy thêm ở đây
+                if (currentData.length === 1 && currentPage !== 1) {
+                    paginate(currentPage - 1); // Chuyển đến trang trước nếu currentData rỗng và không phải là trang đầu tiên
+                } else if (currentData.length === 1 && currentPage === 1) {
+                    paginate(1); // Nếu currentData rỗng và đang ở trang đầu tiên, vẫn paginate trang đầu tiên
+                }
+            } catch (error) {
+                console.log(error);
+                toast.error('An error occurred!');
+            }
         }
     }
+
 
     const navigate = useNavigate();
     const handleBackButton = () => {
@@ -101,7 +115,7 @@ export default function Medicine() {
                 </div>
             </div>
             <div className="d-flex flex-column align-items-center justify-content-center mb-4" style={{ paddingTop: 20 }}>
-                <div className="w-75 rounded bg-white border shadow " style={{  }}>
+                <div className="w-75 rounded bg-white border shadow " style={{}}>
                     <div className="d-flex justify-content-end mt-3 align-items-end border-bottom">
                         <div className="flex-grow-1 mx-3">
                             <h5>Medicine List</h5>
@@ -112,7 +126,7 @@ export default function Medicine() {
                     <div className="d-flex flex-grow-1 align-items-center mx-3">
                         <Search onSearchChange={handleSearchChange} searchData={medicine} />
                     </div>
-                    <div className="mx-3" style={{ }}>
+                    <div className="mx-3" style={{}}>
                         {
                             filteredData.length > 0 ? (
                                 <table className="table table-hover table-striped align-middle">
@@ -130,7 +144,7 @@ export default function Medicine() {
                                         {currentData.map((d, i) => (
                                             <tr key={i}>
                                                 {/* <td>{d.id}</td> */}
-                                                <td style={{ width: 210, textTransform: 'uppercase', fontWeight: 500}}>{d.name}</td>
+                                                <td style={{ width: 210, textTransform: 'uppercase', fontWeight: 500 }}>{d.name}</td>
                                                 <td style={{ width: 210 }}>{d.expiry}</td>
                                                 <td style={{ width: 210 }}>{d.imp}</td>
                                                 <td style={{ width: 210 }}>{d.exp}</td>
@@ -158,7 +172,7 @@ export default function Medicine() {
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td  colSpan="10">No results found</td>
+                                                <td colSpan="10">No results found</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -178,7 +192,7 @@ export default function Medicine() {
                                             {(sortedData.length > 0 ? currentData : currentData).map((d, i) => (
                                                 <tr key={i}>
                                                     {/* <td>{d.id}</td> */}
-                                                    <td style={{ width: 210, textTransform: 'uppercase', fontWeight: 500}}>{d.name}</td>
+                                                    <td style={{ width: 210, textTransform: 'uppercase', fontWeight: 500 }}>{d.name}</td>
                                                     <td style={{ width: 210 }}>{d.expiry}</td>
                                                     <td style={{ width: 210 }}>{d.imp}</td>
                                                     <td style={{ width: 210 }}>{d.exp}</td>

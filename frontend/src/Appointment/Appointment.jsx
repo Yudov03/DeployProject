@@ -7,54 +7,48 @@ import Header from "../components/Header";
 import { useLocation } from 'react-router-dom';
 import CompletedAppointment from "./Completed";
 import { useMemo } from "react";
+import { toast } from "react-toastify";
 export default function Appointment({ read, name }) {
     const isRead = read ? read : null;
     const [data, setAppointment] = useState([])
     useEffect(() => {
-            AxiosInstance.get(`appointments/`)
-                .then(res => setAppointment(res.data.filter(data => data.completed === false)))
-                .catch(err => console.log(err));
-        
-    }, []);
+        AxiosInstance.get(`appointments/`)
+            .then(res => setAppointment(res.data.filter(data => data.completed === false)))
+            .catch(err => console.log(err));
 
+    }, []);
+    // console.log(name)
     ////////////////////////
     const AppointmentMatch = useMemo(() => {
         return data.filter(e => e.patientname === name);
     }, [data, name, read]);
-    const [eventRead, setEventRead] = useState([]) 
-    { isRead !== null && useEffect(() => {
-        const eventsAppointmentMatch = AppointmentMatch.map(item => {
-            if (read === "readPatient") {
-                return {
-                    id: item.id,
-                    time: item.time,
-                    date: item.day,
-                    patientname: item.patientname,
-                    doctorname: item.doctorname,
-                    feestatus: item.feestatus,
-                    completed: item.completed,
-                    diagnosis: item.diagnosis,
-                    rate: item.rate,
-                };
-            }
-            return null;
-        });
-        setEventRead(eventsAppointmentMatch);
+    const [eventRead, setEventRead] = useState([])
+    {
+        isRead !== null && useEffect(() => {
+            const eventsAppointmentMatch = AppointmentMatch.map(item => {
+                if (read === "readPatient") {
+                    return {
+                        id: item.id,
+                        time: item.time,
+                        date: item.date,
+                        patientname: item.patientname,
+                        doctorname: item.doctorname,
+                        feestatus: item.feestatus,
+                        completed: item.completed,
+                        diagnosis: item.diagnosis,
+                        rate: item.rate,
+                    };
+                }
+                return null;
+            });
+            setEventRead(eventsAppointmentMatch);
         }, [AppointmentMatch]);
     }
     ////////////////////
-    
 
-    const handleDelete = (id) => {
-        const confirm = window.confirm("Would you like to Delete?");
-        if (confirm) {
-            AxiosInstance.delete(`appointments/${id}/`)
-                .then(res => {
-                    location.reload()
-                })
-                .catch(err => console.log(err));
-        }
-    }
+
+
+
 
     const [filteredData, setFilteredData] = useState([]);
     const [searchValue, setSearchValue] = useState('');
@@ -63,12 +57,12 @@ export default function Appointment({ read, name }) {
         if (!searchValue.trim()) {
             setFilteredData([]);
         } else {
-            const filtered = (isRead?eventRead:data).filter(item => item.patientname.toLowerCase().includes(searchValue.toLowerCase()));
+            const filtered = (isRead ? eventRead : data).filter(item => item.patientname.toLowerCase().includes(searchValue.toLowerCase()));
             setFilteredData(filtered);
         }
     };
+    // console.log(name)
 
-    
 
     const [sortedData, setSortedData] = useState([]);
     const [sortDirections, setSortDirections] = useState({
@@ -78,10 +72,10 @@ export default function Appointment({ read, name }) {
         patientname: null,
         feestatus: null,
     });
-    
+
     const handleSortChange = (type) => {
         const isAscending = sortDirections[type] === 'asc';
-        const sorted = [...(isRead?eventRead:data)].sort((a, b) => {
+        const sorted = [...(isRead ? eventRead : data)].sort((a, b) => {
             if (type === 'patientname') {
                 return isAscending ? a.patientname.localeCompare(b.patientname) : b.patientname.localeCompare(a.patientname);
             } else if (type === 'doctorname') {
@@ -103,29 +97,51 @@ export default function Appointment({ read, name }) {
             [type]: isAscending ? 'desc' : 'asc'
         }));
     }
-    
+
     // Dữ liệu và logic cho pagination
     const [currentPage, setCurrentPage] = useState(1);
     const dataPerPage = 4; // Số lượng dữ liệu trên mỗi trang
-    const totalData = filteredData.length > 0 ? filteredData.length : sortedData.length > 0 ? sortedData.length : (isRead?eventRead:data).length;
+    const totalData = filteredData.length > 0 ? filteredData.length : sortedData.length > 0 ? sortedData.length : (isRead ? eventRead : data).length;
 
     // Tính toán vị trí của dữ liệu trên trang hiện tại
     const indexOfLastData = currentPage * dataPerPage;
     const indexOfFirstData = indexOfLastData - dataPerPage;
-    const currentData = filteredData.length > 0 ? filteredData.slice(indexOfFirstData, indexOfLastData) : sortedData.length > 0 ? sortedData.slice(indexOfFirstData, indexOfLastData) : (isRead?eventRead:data).slice(indexOfFirstData, indexOfLastData);
+    const currentData = filteredData.length > 0 ? filteredData.slice(indexOfFirstData, indexOfLastData) : sortedData.length > 0 ? sortedData.slice(indexOfFirstData, indexOfLastData) : (isRead ? eventRead : data).slice(indexOfFirstData, indexOfLastData);
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
-    
-    
+
+
     const location = useLocation();
     const currentPath = location.pathname;
+    // console.log(currentData.length)
+
+    const handleDelete = async (id) => {
+        const confirmDelete = window.confirm("Would you like to Delete?");
+        if (confirmDelete) {
+            try {
+                await AxiosInstance.delete(`appointments/${id}/`)
+                toast.success('Deleted Success!');
+                setAppointment(prevData => prevData.filter(item => item.id !== id));
+                setFilteredData(prevFilteredData => prevFilteredData.filter(item => item.id !== id));
+                setSortedData(prevFilteredData => prevFilteredData.filter(item => item.id !== id));
+                if (currentData.length === 1 && currentPage !== 1) {
+                    paginate(currentPage - 1); // Chuyển đến trang trước nếu currentData rỗng và không phải là trang đầu tiên
+                } else if (currentData.length === 1 && currentPage === 1) {
+                    paginate(1); // Nếu currentData rỗng và đang ở trang đầu tiên, vẫn paginate trang đầu tiên
+                }
+            } catch (error) {
+                console.log(error);
+                toast.error('An error occurred!');
+            }
+        }
+    }
 
     return (
         <>
             {
                 currentPath === "/appointment" && <Header />
             }
-            
+
             <div className="d-flex flex-column align-items-center justify-content-center mb-4" style={{ paddingTop: 20 }}>
                 <div className="w-75 rounded bg-white border shadow " style={{}}>
                     <div className="mx-3" style={{}}>
@@ -142,9 +158,9 @@ export default function Appointment({ read, name }) {
                                 <div style={{}}>
                                     <div className="d-flex align-items-center">
                                         <div className="d-flex flex-grow-1 align-items-center mx-3">
-                                            <Search onSearchChange={handleSearchChange} searchData={(isRead?eventRead:data)} />
+                                            <Search onSearchChange={handleSearchChange} searchData={(isRead ? eventRead : data)} />
                                         </div>
-                                        <Link to="/appointment/add" state={{ type: "Appointment" }} className='btn btn-success me-5 py-1 mb-3 mt-3'> + New Appointment </Link>
+                                        <Link to="/appointment/add" state={{ namePatient: name }} className='btn btn-success me-5 py-1 mb-3 mt-3'> + New Appointment </Link>
                                         <div className="mb-2 me-3 mt-2"><i className="bi bi-clipboard-data" style={{ fontSize: '1.9rem' }}></i></div>
 
                                     </div>
@@ -164,14 +180,14 @@ export default function Appointment({ read, name }) {
                                             <tbody>
                                                 {currentData.map((d, i) => (
                                                     <tr key={i}>
-                                                        <td style={{ width: 120 }}>{d.time}</td>
                                                         <td style={{ width: 120 }}>{d.date}</td>
+                                                        <td style={{ width: 120 }}>{d.time}</td>
                                                         <td style={{ width: 215 }}>{d.patientname}</td>
                                                         <td style={{ width: 215 }}>{d.doctorname}</td>
                                                         <td style={{ width: 175 }}>{d.feestatus ? <div style={{ color: 'green' }}>paid</div> : <div style={{ color: 'red' }}>unpaid</div>}</td>
                                                         <td>
-                                                            <Link to={(isRead?'/appointment/read/'+d.id:`read/${d.id}`)} className='btn btn-sm btn-info me-2'><i className="bi bi-info-square"></i></Link>
-                                                            <Link to={(isRead?'/appointment/update/'+d.id:`update/${d.id}`)} className="btn btn-sm btn-primary me-2"><i className="bi bi-pencil-square"></i></Link>
+                                                            <Link to={(isRead ? '/appointment/read/' + d.id : `read/${d.id}`)} className='btn btn-sm btn-info me-2'><i className="bi bi-info-square"></i></Link>
+                                                            <Link to={(isRead ? '/appointment/update/' + d.id : `update/${d.id}`)} className="btn btn-sm btn-primary me-2"><i className="bi bi-pencil-square"></i></Link>
                                                             <button onClick={() => handleDelete(d.id)} className="btn btn-sm btn-danger"><i className="bi bi-trash3"></i></button>
                                                         </td>
                                                     </tr>
@@ -192,7 +208,7 @@ export default function Appointment({ read, name }) {
                                             </thead>
                                             <tbody>
                                                 <tr>
-                                                    <td  colSpan="10">No results found</td>
+                                                    <td colSpan="10">No results found</td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -211,14 +227,14 @@ export default function Appointment({ read, name }) {
                                             <tbody>
                                                 {currentData.map((d, i) => (
                                                     <tr key={i}>
-                                                        <td style={{ width: 120 }}>{d.time}</td>
                                                         <td style={{ width: 120 }}>{d.date}</td>
+                                                        <td style={{ width: 120 }}>{d.time}</td>
                                                         <td style={{ width: 215 }}>{d.patientname}</td>
                                                         <td style={{ width: 215 }}>{d.doctorname}</td>
                                                         <td style={{ width: 175 }}>{d.feestatus ? <div style={{ color: 'green' }}>paid</div> : <div style={{ color: 'red' }}>unpaid</div>}</td>
                                                         <td>
-                                                            <Link to={(isRead?'/appointment/read/'+d.id:`read/${d.id}`)} className='btn btn-sm btn-info me-2'><i className="bi bi-info-square"></i></Link>
-                                                            <Link to={(isRead?'/appointment/update/'+d.id:`update/${d.id}`)} className="btn btn-sm btn-primary me-2"><i className="bi bi-pencil-square"></i></Link>
+                                                            <Link to={(isRead ? '/appointment/read/' + d.id : `read/${d.id}`)} className='btn btn-sm btn-info me-2'><i className="bi bi-info-square"></i></Link>
+                                                            <Link to={(isRead ? '/appointment/update/' + d.id : `update/${d.id}`)} className="btn btn-sm btn-primary me-2"><i className="bi bi-pencil-square"></i></Link>
                                                             <button onClick={() => handleDelete(d.id)} className="btn btn-sm btn-danger"><i className="bi bi-trash3"></i></button>
                                                         </td>
                                                     </tr>
@@ -248,14 +264,14 @@ export default function Appointment({ read, name }) {
                                 }
                             </div>
                             <div className="tab-pane" id="completedappointment" role="tabpanel" aria-labelledby="completedappointment-tab" tabIndex="0">
-                                <CompletedAppointment  read={read} name={name}/>
+                                <CompletedAppointment read={read} name={name} />
                             </div>
-                            
+
                         </div>
                     </div>
                 </div>
             </div>
-            
+
         </>
 
     )

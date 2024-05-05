@@ -93,9 +93,10 @@ export default function ReadAppointment() {
                         </div>
                         </div>
                     </div>
+                    {data.completed === false?
                     <div className="d-grid gap-2 col-3 mx-auto mt-4 mb-4">
                         <Link to={`/appointment/update/${id}`} className="btn btn-sm btn-primary me-2">Edit</Link>
-                    </div>
+                    </div>:""}
                 </div>
             </div>
         </>

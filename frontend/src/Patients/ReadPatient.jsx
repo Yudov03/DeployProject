@@ -71,7 +71,7 @@ function ReadPatient() { // Ensure props are received here
                                             <Link to={`/patient/update/${id}`} className="btn btn-sm btn-primary me-2">Edit</Link>
                                         </div>
                                     </div>
-                                    
+
                                 </div>
                             </div>
                         </div>
@@ -85,18 +85,15 @@ function ReadPatient() { // Ensure props are received here
                                 <div className="col-6">Phone: {data.phone}</div>
                                 <div className="col-6">Mail: {data.mail}</div>
                             </div>
-                            
+
                             <br />
 
                         </div>
 
                     </div>
-                    
-                    
                 </div>
             </div>
-            
-            <Appointment read="readPatient" name={data.name}/>
+            <Appointment name={data.name} />
         </>
     );
 }

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import AxiosInstance from "../components/AxiosInstance";
+import { toast } from "react-toastify";
 
 export default function UpdateMedicine() {
 
@@ -21,13 +22,27 @@ export default function UpdateMedicine() {
     }, [])
 
     const { id } = useParams();
-    const handleUpdateMedicine = (event) => {
+    const handleUpdateMedicine = async (event) => {
         event.preventDefault();
-        AxiosInstance.put(`medicines/${id}`, values)
-            .then(res => {
-                console.log(res);
-            })
-            .catch(err => console.log(err));
+        try {
+            const res = await AxiosInstance.put(`medicines/${id}/`, values)
+            console.log(res);
+            if (res.status === 200) {
+                toast.success('Updated Success');
+            } else if (res.status === 400) {
+                toast.error('Please fill full');
+            } else {
+                toast.error('An error occurred');
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error(`${error}, Please try again!`);
+        }
+        // AxiosInstance.put(`medicines/${id}`, values)
+        //     .then(res => {
+        //         console.log(res);
+        //     })
+        //     .catch(err => console.log(err));
         // setValues({
         //     name: '',
         //     exp: '',
@@ -80,28 +95,28 @@ export default function UpdateMedicine() {
                                     </div>
                                     <div className="col-8">
                                         <div className="col">
-                                            <label style={{ fontWeight: 'bold' }} htmlFor="name">Name:</label>
-                                            <input type="text" className="form-control" placeholder={`${values.name}`} value={values.name} onChange={e => setValues({ ...values, name: e.target.value })} />
+                                            <label style={{ fontWeight: 'bold' }} htmlFor="nameid">Name:</label>
+                                            <input type="text" className="form-control" id="nameid" placeholder={`${values.name}`} value={values.name} onChange={e => setValues({ ...values, name: e.target.value })} />
                                         </div>
                                         <div className="col mt-3">
-                                            <label style={{ fontWeight: 'bold' }} htmlFor="expiry">Expired Day:</label>
-                                            <input type="date" className="form-control" placeholder={`${values.expiry}`} value={values.expiry} onChange={e => setValues({ ...values, expiry: e.target.value })} />
+                                            <label style={{ fontWeight: 'bold' }} htmlFor="expiryid">Expired Day:</label>
+                                            <input type="date" className="form-control" id="expiryid" placeholder={`${values.expiry}`} value={values.expiry} onChange={e => setValues({ ...values, expiry: e.target.value })} />
                                         </div>
                                     </div>
                                 </div>
                                 <div className="row mt-3">
                                     <div className="col">
-                                        <label style={{ fontWeight: 'bold' }} htmlFor="imp">Import Day:</label>
-                                        <input type="date" className="form-control" placeholder={`${values.imp}`} value={values.imp} onChange={e => setValues({ ...values, imp: e.target.value })} />
+                                        <label style={{ fontWeight: 'bold' }} htmlFor="impid">Import Day:</label>
+                                        <input type="date" className="form-control" id="impid" placeholder={`${values.imp}`} value={values.imp} onChange={e => setValues({ ...values, imp: e.target.value })} />
                                     </div>
                                     <div className="col">
-                                        <label style={{ fontWeight: 'bold' }} htmlFor="exp">Export Day:</label>
-                                        <input type="date" className="form-control" placeholder={`${values.exp}`} value={values.exp} onChange={e => setValues({ ...values, exp: e.target.value })} />
+                                        <label style={{ fontWeight: 'bold' }} htmlFor="expid">Export Day:</label>
+                                        <input type="date" className="form-control" id="expid" placeholder={`${values.exp}`} value={values.exp} onChange={e => setValues({ ...values, exp: e.target.value })} />
                                     </div>
                                 </div>
                                 <div className="mt-3">
-                                    <label style={{ fontWeight: 'bold' }} htmlFor="basic-url" className="form-label">Description: </label>
-                                    <textarea style={{ height: 150 }} className="form-control" aria-label="With textarea" placeholder={`${values.description}`} value={values.description} onChange={e => setValues({ ...values, description: e.target.value })}></textarea>
+                                    <label style={{ fontWeight: 'bold' }} htmlFor="basic-urlid" className="form-label">Description: </label>
+                                    <textarea style={{ height: 150 }} className="form-control" id="basic-urlid" aria-label="With textarea" placeholder={`${values.description}`} value={values.description} onChange={e => setValues({ ...values, description: e.target.value })}></textarea>
                                 </div>
 
                                 <div className="d-grid gap-2 col-3 mx-auto mt-4 mb-4">

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Search from "../Search/Search";
 import Sort from "../Sort/Sort";
+import { toast } from "react-toastify";
 
 
 function Patient() {
@@ -14,17 +15,29 @@ function Patient() {
             .catch(err => console.log(err));
     }, [])
 
-    const handleDelete = (id) => {
+    const handleDelete = async (id) => {
         const confirm = window.confirm("Would you like to Delete?");
         if (confirm) {
-            AxiosInstance.delete(`patients/${id}`)
-                .then(res => {
-                    location.reload()
-                })
-                .catch(err => console.log(err));
+            try {
+                await AxiosInstance.delete(`patients/${id}`);
+                toast.success('Deleted Success!');
+                // Nếu xóa thành công, cập nhật dữ liệu bằng cách loại bỏ bệnh nhân có id tương ứng
+                setData(prevData => prevData.filter(patient => patient.id !== id));
+                setFilteredData(prevFilteredData => prevFilteredData.filter(patient => patient.id !== id));
+                setSortedData(prevFilteredData => prevFilteredData.filter(item => item.id !== id));
+                // Cập nhật các biến state khác nếu cần
+                if (currentData.length === 1 && currentPage !== 1) {
+                    paginate(currentPage - 1); // Chuyển đến trang trước nếu currentData rỗng và không phải là trang đầu tiên
+                } else if (currentData.length === 1 && currentPage === 1) {
+                    paginate(1); // Nếu currentData rỗng và đang ở trang đầu tiên, vẫn paginate trang đầu tiên
+                }
+            } catch (error) {
+                console.log(error);
+                toast.error('An error occurred!');
+            }
         }
-
     }
+
 
     const navigate = useNavigate();
     const handleBackButton = () => {
@@ -48,7 +61,8 @@ function Patient() {
         name: null,
         gender: null,
         dayofbirth: null,
-        phone: null
+        phone: null,
+        mail: null,
     });
     const [typeSort, setTypeSort] = useState(null)
     const handleSortChange = (type) => {
@@ -63,6 +77,8 @@ function Patient() {
                 return isAscending ? new Date(a.dayofbirth) - new Date(b.dayofbirth) : new Date(b.dayofbirth) - new Date(a.dayofbirth);
             } else if (type === 'phone') {
                 return isAscending ? a.phone.localeCompare(b.phone) : b.phone.localeCompare(a.phone);
+            } else if (type === 'mail') {
+                return isAscending ? a.mail.localeCompare(b.mail) : b.mail.localeCompare(a.mail);
             }
             return 0; // Default sorting
         });
@@ -106,7 +122,7 @@ function Patient() {
                 </div>
             </div>
             <div className="d-flex flex-column align-items-center justify-content-center mb-4" style={{ paddingTop: 20 }}>
-                <div className="w-75 rounded bg-white border shadow " style={{  }}>
+                <div className="w-75 rounded bg-white border shadow " style={{}}>
                     <div className="d-flex justify-content-end mt-3 align-items-end border-bottom">
                         <div className="flex-grow-1 mx-3">
                             <h5>Patient List</h5>
@@ -117,84 +133,84 @@ function Patient() {
                     <div className="d-flex flex-grow-1 align-items-center mx-3">
                         <Search onSearchChange={handleSearchChange} searchData={patients} />
                     </div>
-                    <div className="mx-3" style={{  }}>
-                    {filteredData.length > 0 ? (
-                        <table className="table table-hover table-striped align-middle">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Date of birth</th>
-                                    <th>Gender</th>
-                                    <th>Mail</th>
-                                    <th>Phone</th>
-                                    <th>User Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {currentData.map((d, i) => (
-                                    <tr key={i}>
-                                        <td style={{ width: 180, textTransform: 'uppercase', fontWeight: 500 }}>{d.name}</td>
-                                        <td style={{ width: 170 }}>{d.dayofbirth}</td>
-                                        <td style={{ width: 120 }}>{d.gender === 'M' ? "Male" :<div>{d.gender==='F'?"Female":"Other"}</div> }</td>
-                                        <td style={{ width: 260 }}>{d.mail}</td>
-                                        <td style={{ width: 130 }}>{d.phone}</td>
-                                        <td>
-                                            <Link to={`read/${d.id}`} className='btn btn-sm btn-info me-2'><i className="bi bi-info-square"></i></Link>
-                                            <Link to={`update/${d.id}`} className="btn btn-sm btn-primary me-2"><i className="bi bi-pencil-square"></i></Link>
-                                            <button onClick={() => handleDelete(d.id)} className="btn btn-sm btn-danger"><i className="bi bi-trash3"></i></button>
-                                        </td>
+                    <div className="mx-3" style={{}}>
+                        {filteredData.length > 0 ? (
+                            <table className="table table-hover table-striped align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Date of birth</th>
+                                        <th>Gender</th>
+                                        <th>Mail</th>
+                                        <th>Phone</th>
+                                        <th>User Action</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    ) : (searchValue && filteredData.length === 0 ? (
-                        <table className="table table-hover table-striped align-middle">
-                            <thead>
-                                <tr>
-                                    <th style={{ width: 180 }}>Name</th>
-                                    <th style={{ width: 170 }}>Date of birth</th>
-                                    <th style={{ width: 120 }}>Gender</th>
-                                    <th style={{ width: 260 }}>Mail</th>
-                                    <th style={{ width: 130 }}>Phone</th>
-                                    <th>User Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td  colSpan="10">No results found</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    ) : (
-                        <table className="table table-hover table-striped align-middle">
-                            <thead>
-                                <tr>
-                                    <th>Name <Sort handleSortChange={handleSortChange} type="name" sortDirection={sortDirections.name} /></th>
-                                    <th>Date of birth <Sort handleSortChange={handleSortChange} type="dayofbirth" sortDirection={sortDirections.dayofbirth} /></th>
-                                    <th>Gender <Sort handleSortChange={handleSortChange} type="gender" sortDirection={sortDirections.gender} /></th>
-                                    <th>Mail <Sort handleSortChange={handleSortChange} type="mail" sortDirection={sortDirections.mail} /></th>
-                                    <th>Phone <Sort handleSortChange={handleSortChange} type="phone" sortDirection={sortDirections.phone} /></th>
-                                    <th style={{ paddingBottom: 14 }}>User Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {currentData.map((d, i) => (
-                                    <tr key={i}>
-                                        <td style={{ width: 180, textTransform: 'uppercase', fontWeight: 500}}>{d.name}</td>
-                                        <td style={{ width: 170 }}>{d.dayofbirth}</td>
-                                        <td style={{ width: 120 }}>{d.gender === 'M' ? "Male" :<div>{d.gender==='F'?"Female":"Other"}</div> }</td>
-                                        <td style={{ width: 260 }}>{d.mail}</td>
-                                        <td style={{ width: 130 }}>{d.phone}</td>
-                                        <td>
-                                            <Link to={`read/${d.id}`} className='btn btn-sm btn-info me-2'><i className="bi bi-info-square"></i></Link>
-                                            <Link to={`update/${d.id}`} className="btn btn-sm btn-primary me-2"><i className="bi bi-pencil-square"></i></Link>
-                                            <button onClick={() => handleDelete(d.id)} className="btn btn-sm btn-danger"><i className="bi bi-trash3"></i></button>
-                                        </td>
+                                </thead>
+                                <tbody>
+                                    {currentData.map((d, i) => (
+                                        <tr key={i}>
+                                            <td style={{ width: 180, textTransform: 'uppercase', fontWeight: 500 }}>{d.name}</td>
+                                            <td style={{ width: 170 }}>{d.dayofbirth}</td>
+                                            <td style={{ width: 120 }}>{d.gender === 'M' ? "Male" : <div>{d.gender === 'F' ? "Female" : "Other"}</div>}</td>
+                                            <td style={{ width: 260 }}>{d.mail}</td>
+                                            <td style={{ width: 130 }}>{d.phone}</td>
+                                            <td>
+                                                <Link to={`read/${d.id}`} className='btn btn-sm btn-info me-2'><i className="bi bi-info-square"></i></Link>
+                                                <Link to={`update/${d.id}`} className="btn btn-sm btn-primary me-2"><i className="bi bi-pencil-square"></i></Link>
+                                                <button onClick={() => handleDelete(d.id)} className="btn btn-sm btn-danger"><i className="bi bi-trash3"></i></button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        ) : (searchValue && filteredData.length === 0 ? (
+                            <table className="table table-hover table-striped align-middle">
+                                <thead>
+                                    <tr>
+                                        <th style={{ width: 180 }}>Name</th>
+                                        <th style={{ width: 170 }}>Date of birth</th>
+                                        <th style={{ width: 120 }}>Gender</th>
+                                        <th style={{ width: 260 }}>Mail</th>
+                                        <th style={{ width: 130 }}>Phone</th>
+                                        <th>User Action</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    ))}
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colSpan="10">No results found</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        ) : (
+                            <table className="table table-hover table-striped align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Name <Sort handleSortChange={handleSortChange} type="name" sortDirection={sortDirections.name} /></th>
+                                        <th>Date of birth <Sort handleSortChange={handleSortChange} type="dayofbirth" sortDirection={sortDirections.dayofbirth} /></th>
+                                        <th>Gender <Sort handleSortChange={handleSortChange} type="gender" sortDirection={sortDirections.gender} /></th>
+                                        <th>Mail <Sort handleSortChange={handleSortChange} type="mail" sortDirection={sortDirections.mail} /></th>
+                                        <th>Phone <Sort handleSortChange={handleSortChange} type="phone" sortDirection={sortDirections.phone} /></th>
+                                        <th style={{ paddingBottom: 14 }}>User Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {currentData.map((d, i) => (
+                                        <tr key={i}>
+                                            <td style={{ width: 180, textTransform: 'uppercase', fontWeight: 500 }}>{d.name}</td>
+                                            <td style={{ width: 170 }}>{d.dayofbirth}</td>
+                                            <td style={{ width: 120 }}>{d.gender === 'M' ? "Male" : <div>{d.gender === 'F' ? "Female" : "Other"}</div>}</td>
+                                            <td style={{ width: 260 }}>{d.mail}</td>
+                                            <td style={{ width: 130 }}>{d.phone}</td>
+                                            <td>
+                                                <Link to={`read/${d.id}`} className='btn btn-sm btn-info me-2'><i className="bi bi-info-square"></i></Link>
+                                                <Link to={`update/${d.id}`} className="btn btn-sm btn-primary me-2"><i className="bi bi-pencil-square"></i></Link>
+                                                <button onClick={() => handleDelete(d.id)} className="btn btn-sm btn-danger"><i className="bi bi-trash3"></i></button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        ))}
                     </div>
                     {searchValue && filteredData.length === 0 ? "" :
                         (currentPage !== 1 && searchValue && filteredData.length !== 0 ? paginate(1) :

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Search from "../Search/Search";
 import Sort from "../Sort/Sort";
+import { toast } from "react-toastify";
 
 export default function Nurse() {
 
@@ -16,16 +17,29 @@ export default function Nurse() {
             .catch(err => console.log(err));
     }, []);
 
-    const handleDelete = (id) => {
+    const handleDelete = async (id) => {
         const confirm = window.confirm("Would you like to Delete?");
         if (confirm) {
-            AxiosInstance.delete(`staffs/${id}/`)
-                .then(res => {
-                    location.reload()
-                })
-                .catch(err => console.log(err));
+            try {
+                await AxiosInstance.delete(`staffs/${id}/`);
+                toast.success('Deleted Success!');
+                // Nếu xóa thành công, cập nhật dữ liệu bằng cách loại bỏ y tá có id tương ứng
+                setData(prevData => prevData.filter(nurse => nurse.id !== id));
+                setFilteredData(prevFilteredData => prevFilteredData.filter(nurse => nurse.id !== id));
+                setSortedData(prevFilteredData => prevFilteredData.filter(item => item.id !== id));
+                // Cập nhật các biến state khác nếu cần
+                if (currentData.length === 1 && currentPage !== 1) {
+                    paginate(currentPage - 1); // Chuyển đến trang trước nếu currentData rỗng và không phải là trang đầu tiên
+                } else if (currentData.length === 1 && currentPage === 1) {
+                    paginate(1); // Nếu currentData rỗng và đang ở trang đầu tiên, vẫn paginate trang đầu tiên
+                }
+            } catch (error) {
+                console.log(error);
+                toast.error('An error occurred!');
+            }
         }
     }
+
 
     const [sortedData, setSortedData] = useState([]);
     const [sortDirections, setSortDirections] = useState({
@@ -91,7 +105,9 @@ export default function Nurse() {
                         <Search onSearchChange={handleSearchChange} searchData={nurseData} />
                     </div>
                     <Link to="/staff/add" state={{ type: "Nurse" }} className='btn btn-success me-5 py-1 mb-3 mt-3'> + New Nurse </Link>
-                    <div className="mb-2 me-3 mt-2"><i className="bi bi-person" style={{ fontSize: '1.9rem' }}></i></div>
+                    <div className="mb-2 me-3 mt-2">
+                        <svg style={{ width: 30, height: 30 }} className="" ><path d="M19.542,16.027A7,7,0,0,0,23,10V5a3,3,0,0,0-3-3H12A3,3,0,0,0,9,5v5a7,7,0,0,0,3.458,6.027A9,9,0,0,0,4,25v3a2,2,0,0,0,2,2H26a2,2,0,0,0,2-2V25A9,9,0,0,0,19.542,16.027ZM12,4h8a1,1,0,0,1,1,1V8H11V5A1,1,0,0,1,12,4Zm-1,6H21a5,5,0,0,1-10,0Zm0,12a1,1,0,1,1-1,1A1,1,0,0,1,11,22ZM6,28V25a7,7,0,0,1,4-6.315v1.5a3,3,0,1,0,2,0v-2.1A7.026,7.026,0,0,1,13,18h6v1.142A4,4,0,0,0,16,23v2a1,1,0,0,0,1,1h1a1,1,0,0,0,0-2V23a2,2,0,0,1,4,0v1a1,1,0,0,0,0,2h1a1,1,0,0,0,1-1V23a4,4,0,0,0-3-3.858V18.3A7.009,7.009,0,0,1,26,25v3Z"></path></svg>
+                    </div>
                 </div>
 
                 {filteredData.length > 0 ? (

@@ -57,14 +57,14 @@ export default function ReadStaff() { // Ensure props are received here
                             <div className="d-flex justify-content-center border border-1 border-primary w-100">
                                 <div className="d-flex flex-column w-100 ms-2" >
                                     <div className="d-flex justify-content-center mt-2">
-                                        <h5 style={{ textTransform: 'uppercase' }}>DR. {data.name}</h5>
+                                        <h5 style={{ textTransform: 'uppercase' }}>{data.position==='D'?"Dr. ":""}{data.name}</h5>
                                     </div>
                                     <div className="row">
 
                                         <div className="col-10">
                                             <div>Day of birth: {data.dayofbirth}</div>
                                             <div className="d-flex">Gender: {data.gender === 'M' ? "Male" : <div className="ms-1">{data.gender === 'F' ? "Female" : "Other"}</div>}</div>
-                                            
+
                                         </div>
                                         <div className="col-2">
                                             <Link to={`/staff/update/${id}`} className="btn btn-sm btn-primary w-75">Edit</Link>
@@ -75,7 +75,7 @@ export default function ReadStaff() { // Ensure props are received here
                             </div>
                         </div>
                     </div>
-                    <div className=" d-flex justify-content-center" >
+                    <div className=" d-flex justify-content-center mb-4" >
                         <div className="w-75 border border-1 border-primary" >
                             <div className="d-flex justify-content-center mt-3">
                                 <div style={{ fontWeight: 'bold' }}>CONTACT</div>
@@ -89,17 +89,19 @@ export default function ReadStaff() { // Ensure props are received here
                             </div>
                             <div className="row p-2">
                                 <div className="col-6">Specialty: {data.specialty}</div>
-                                <div className="col-6">Specialty level: {data.specialtylevel}</div>
-                                <div className="col-6 d-flex mt-2">Academic degree: {data.certificate === "M"?" Master": <div className="ms-1">{data.certificate==="D"?" Doctor":" Ph.D"}</div> }</div>
-                                <div className="col-6 mt-2 d-flex">Academic rank: {data.academicrank === "A" ? "Associate Professor" : <div className="ms-1">{data.academicrank==="P"?"Professor":"No"}</div> }</div>
+                                
+                                {data.position==='D'?<div className="col-6">Specialty level: {data.specialtylevel}</div>:""}
+                                {data.position==='D'?<div className="col-6 d-flex mt-2">Academic degree: {data.certificate === "M"?" Master": <div className="ms-1">{data.certificate==="D"?" Doctor": <div>{data.certificate==="P"?"Ph.D":"No"}</div>}</div> }</div>:""}
+                                {data.position==='D'?<div className="col-6 mt-2 d-flex">Academic rank: {data.academicrank === "A" ? "Associate Professor" : <div className="ms-1">{data.academicrank==="P"?"Professor":"No"}</div> }</div>:""}
+                                
                             </div>
                             <br />
 
                         </div>
 
                     </div>
-                    <div className="d-flex justify-content-center mt-5"><div className="" style={{fontWeight: 'bold'}}>SCHEDULE</div></div>
-                    <Schedule read="readStaffs" name={data.name} />
+                    {data.position==='D'?<div className="d-flex justify-content-center mt-5"><div className="" style={{ fontWeight: 'bold' }}>SCHEDULE</div></div>:""}
+                    {data.position==='D'?<Schedule read="readStaffs" name={data.name} />:""}
                 </div>
             </div>
         </>

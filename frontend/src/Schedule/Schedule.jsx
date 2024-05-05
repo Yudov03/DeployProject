@@ -6,6 +6,7 @@ import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import AxiosInstance from "../components/AxiosInstance";
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const localizer = momentLocalizer(moment);
 
@@ -54,25 +55,24 @@ export default function Schedule({ read, name, update }) {
     const handleSelectSlot = () => {
         navigate('/schedule/add');
     };
-    
 
-    const handleDeleteEvent = (id, type) => {
-        if (type === 'Schedule') {
-            AxiosInstance.delete(`schedule/${id}`)
-                .then(res => {
-                    console.log(res);
-                    location.reload();
-                    setEvents(prevEvents => prevEvents.filter(event => event.id !== id));
-                })
-                .catch(err => console.log(err));
-        } else if (type === 'Appointment') {
-            AxiosInstance.delete(`appointments/${id}`)
-                .then(res => {
-                    console.log(res);
-                    location.reload();
-                    setEvents(prevEvents => prevEvents.filter(event => event.id !== id));
-                })
-                .catch(err => console.log(err));
+
+    const handleDeleteEvent = async (id, type) => {
+        // event.defaultPrevented();
+        try {
+            if (type === 'Schedule') {
+                await AxiosInstance.delete(`schedule/${id}`);
+                setEventsWork(prevEvents => prevEvents.filter(event => event.id !== id));
+                setEventsScheduleMatch(prevEvents => prevEvents.filter(event => event.id !== id));
+            } else if (type === 'Appointment') {
+                await AxiosInstance.delete(`appointments/${id}`);
+                setEventsAppointment(prevEvents => prevEvents.filter(event => event.id !== id));
+                setEventsAppointmentMatch(prevEvents => prevEvents.filter(event => event.id !== id));
+            }
+            toast.success('Event deleted successfully.');
+        } catch (error) {
+            console.error('Error deleting event:', error);
+            toast.error('Error deleting event. Please try again later.');
         }
     };
 
@@ -179,7 +179,7 @@ export default function Schedule({ read, name, update }) {
         }, [ScheduleMatch]);
     }
 
-    console.log(eventRead)
+    // console.log(eventRead)
     const [currentView, setCurrentView] = useState("Work");
     const renderCalendar = () => (
         <>
@@ -190,11 +190,11 @@ export default function Schedule({ read, name, update }) {
                         <option value="Appointment">Appointment schedule</option>
                     </select>
                 </div>
-                <Link to="/appointment/add" state={{ name: name }} className='btn btn-success me-5 py-1 mb-3 '> + New Appointment </Link>
+                <Link to="/appointment/add" state={{ read: read, name: name }} className='btn btn-success me-5 py-1 mb-3 '> + New Appointment </Link>
                 <Link to="/schedule/add" state={{ name: name }} className='btn btn-success me-5 py-1 mb-3 '> + New Schedule </Link>
                 <div className="mb-2 me-3"><i className="bi bi-calendar-week" style={{ fontSize: '1.9rem' }}></i></div>
             </div>
-            
+
             {currentView === "Work" ?
                 <Calendar
                     localizer={localizer}
@@ -235,67 +235,67 @@ export default function Schedule({ read, name, update }) {
         <>
             <div className='d-flex'>
                 <div className='flex-grow-1 me-5'>
-                <select className='form-control mb-2 w-75' value={currentView} onChange={e => setCurrentView(e.target.value)}>
-                    <option value="Work">Work schedule</option>
-                    <option value="Appointment">Appointment schedule</option>
-                </select>
+                    <select className='form-control mb-2 w-75' value={currentView} onChange={e => setCurrentView(e.target.value)}>
+                        <option value="Work">Work schedule</option>
+                        <option value="Appointment">Appointment schedule</option>
+                    </select>
                 </div>
                 <Link to="/appointment/add" state={{ name: name }} className='btn btn-success me-4 py-1 mb-3 '> + New Appointment </Link>
                 <Link to="/schedule/add" state={{ name: name }} className='btn btn-success me-2 py-1 mb-3 '> + New Schedule </Link>
             </div>
-           
+
             {currentView === "Work" ? <div> {
-                eventsScheduleMatch.length === 0?
+                eventsScheduleMatch.length === 0 ?
+                    <h5 style={{ color: 'grey' }}>No available schedule!</h5> // Trả về null nếu mảng eventRead rỗng
+                    :
+                    <Calendar
+                        localizer={localizer}
+                        events={eventsScheduleMatch}
+                        startAccessor="start"
+                        endAccessor="end"
+                        style={{ height: '600px' }}
+                        selectable
+                        popup
+                        // onSelectSlot={handleSelectSlot}
+                        timeslots={1}
+                        components={{
+                            event: EventComponent
+                        }}
+                    />
+            }</div> : <div>{
+                eventsAppointmentMatch.length === 0 ?
                     <h5 style={{ color: 'grey' }}>None of Appointment</h5> // Trả về null nếu mảng eventRead rỗng
-                :
-                <Calendar
-                    localizer={localizer}
-                    events={eventsScheduleMatch}
-                    startAccessor="start"
-                    endAccessor="end"
-                    style={{ height: '600px' }}
-                    selectable
-                    popup
-                    // onSelectSlot={handleSelectSlot}
-                    timeslots={1}
-                    components={{
-                        event: EventComponent
-                    }}
-                />
-            }</div>: <div>{
-                eventsAppointmentMatch.length === 0?
-                    <h5 style={{ color: 'grey' }}>None of Appointment</h5> // Trả về null nếu mảng eventRead rỗng
-                :
-                <Calendar
-                    localizer={localizer}
-                    events={eventsAppointmentMatch}
-                    startAccessor="start"
-                    endAccessor="end"
-                    style={{ height: '600px' }}
-                    selectable
-                    popup
-                    // onSelectSlot={handleSelectSlot}
-                    timeslots={1}
-                    components={{
-                        event: EventComponent
-                    }}
-                />
+                    :
+                    <Calendar
+                        localizer={localizer}
+                        events={eventsAppointmentMatch}
+                        startAccessor="start"
+                        endAccessor="end"
+                        style={{ height: '600px' }}
+                        selectable
+                        popup
+                        // onSelectSlot={handleSelectSlot}
+                        timeslots={1}
+                        components={{
+                            event: EventComponent
+                        }}
+                    />
             }</div>}
         </>
-            // <Calendar
-            //     localizer={localizer}
-            //     events={eventRead}
-            //     // defaultDate={new Date(moment(eventRead[0].start).format('YYYY, MM, DD'))} // Sử dụng ngày bắt đầu của cuộc họp gần nhất làm defaultView
-            //     startAccessor="start"
-            //     endAccessor="end"
-            //     style={{ height: '600px' }}
-            //     selectable
-            //     popup
-            //     timeslots={1}
-            //     components={{
-            //         event: EventComponent
-            //     }}
-            // />
+        // <Calendar
+        //     localizer={localizer}
+        //     events={eventRead}
+        //     // defaultDate={new Date(moment(eventRead[0].start).format('YYYY, MM, DD'))} // Sử dụng ngày bắt đầu của cuộc họp gần nhất làm defaultView
+        //     startAccessor="start"
+        //     endAccessor="end"
+        //     style={{ height: '600px' }}
+        //     selectable
+        //     popup
+        //     timeslots={1}
+        //     components={{
+        //         event: EventComponent
+        //     }}
+        // />
     );
 
 
@@ -322,7 +322,7 @@ export default function Schedule({ read, name, update }) {
             <div className="d-flex flex-column align-items-center justify-content-center mb-4" style={{ paddingTop: 20 }}>
                 <div className="w-75 rounded bg-white border shadow " style={{ minHeight: 400 }}>
                     <div className="mx-3 mt-3 mb-4">
-                        {isRead === null ?renderCalendar() :renderReadCalendar()}
+                        {isRead === null ? renderCalendar() : renderReadCalendar()}
                     </div>
                 </div>
             </div>

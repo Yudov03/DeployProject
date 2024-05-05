@@ -5,9 +5,10 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Search from "../Search/Search";
 import Sort from '../Sort/Sort';
+import { toast } from "react-toastify";
 
 export default function ReadDevice() {
-    const [data, setData] = useState({});
+    const [data, setData] = useState([]);
     const { id } = useParams();
     const [history, setHistory] = useState([]);
 
@@ -77,6 +78,29 @@ export default function ReadDevice() {
             [type]: isAscending ? 'desc' : 'asc'
         }));
     }
+    const handleDelete = async (id) => {
+        const confirmDelete = window.confirm("Would you like to Delete?");
+        if (confirmDelete) {
+            try {
+                await AxiosInstance.delete(`maintainandrepair/${id}/`);
+                toast.success('Deleted Success!');
+                // Cập nhật dữ liệu sau khi xóa
+                setHistory(prevData => prevData.filter(item => item.id !== id));
+                setFilteredData(prevFilteredData => prevFilteredData.filter(item => item.id !== id));
+                setSortedData(prevFilteredData => prevFilteredData.filter(item => item.id !== id));
+                // Nếu cần cập nhật các biến state khác, hãy thêm ở đây
+                if (currentData.length === 1 && currentPage !== 1) {
+                    paginate(currentPage - 1); // Chuyển đến trang trước nếu currentData rỗng và không phải là trang đầu tiên
+                } else if (currentData.length === 1 && currentPage === 1) {
+                    paginate(1); // Nếu currentData rỗng và đang ở trang đầu tiên, vẫn paginate trang đầu tiên
+                }
+            } catch (error) {
+                console.log(error);
+                toast.error('An error occurred!');
+            }
+        }
+    };
+
 
     // Dữ liệu và logic cho pagination
     const [currentPage, setCurrentPage] = useState(1);
@@ -226,12 +250,12 @@ export default function ReadDevice() {
                                                     <td style={{ width: 110 }}>{d.date}</td>
                                                     <td style={{ width: 110 }}>{d.type === "M" ? "Maintain" : "Repair"}</td>
                                                     <td style={{ width: 420 }}>
-                                                        <div className="form-control" style={{ minHeight: '50px' }}>
+                                                        <div className="form-control" id="detaiiid" style={{ minHeight: '50px' }}>
                                                             {d.detail}
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <Link to={`update/${d.id}`} className="btn btn-sm btn-primary me-2"><i className="bi bi-pencil-square"></i></Link>
+                                                        <Link to={`/maintainandrepair/update/${d.id}`} className="btn btn-sm btn-primary me-2"><i className="bi bi-pencil-square"></i></Link>
                                                         <button onClick={() => handleDelete(d.id)} className="btn btn-sm btn-danger"><i className="bi bi-trash3"></i></button>
                                                     </td>
                                                 </tr>
