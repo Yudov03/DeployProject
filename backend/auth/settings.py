@@ -75,6 +75,9 @@ TEMPLATES = [
     },
 ]
 
+STATIC_ROOT = BASE_DIR/'staticfiles'
+
+
 WSGI_APPLICATION = 'auth.wsgi.application'
 
 REST_FRAMEWORK = {
