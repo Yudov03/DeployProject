@@ -1,7 +1,7 @@
 import AxiosInstance from '../components/AxiosInstance'
 import { React, useEffect, useMemo, useState } from 'react'
 import { Box } from '@mui/material'
-import { NavLink } from 'reactstrap'
+import { Link } from 'react-router-dom'
 
 const Home = () => {
 
@@ -64,7 +64,7 @@ const Home = () => {
                                             </div>
                                             <br></br>
                                             <button className='btn btn-primary'>
-                                                <NavLink href="/dashboard" className="">Go to dashboard</NavLink>
+                                                <Link to="/dashboard" className="btn btn-primary">Go to dashboard</Link>
 
                                             </button>
                                         </div>
