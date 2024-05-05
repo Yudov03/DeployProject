@@ -18,8 +18,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# CORS_ALLOWED_ORIGINS = [  
-# ]
+CORS_ALLOWED_ORIGINS = [  
+    'https://lemon-mushroom-0219fba00.5.azurestaticapps.net'
+]
 
 STORAGES = {
     "default": {
